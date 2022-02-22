@@ -35,6 +35,7 @@ void cleanup_socket()
 	unlink(SOCKET_PATH);
 	if (socket_fd >= 0) {
 		close(socket_fd);
+		socket_fd = -1;
 	}
 }
 
