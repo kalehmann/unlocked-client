@@ -30,7 +30,7 @@
 
 int socket_fd = -1;
 
-void cleanup_socket()
+void cleanup_socket(void)
 {
 	unlink(SOCKET_PATH);
 	if (socket_fd >= 0) {
@@ -39,7 +39,7 @@ void cleanup_socket()
 	}
 }
 
-int init_socket()
+int init_socket(void)
 {
 	struct sockaddr_un addr;
 
@@ -102,13 +102,4 @@ int getKey(int result_cb (char *, size_t))
 	sleep(10);
 
 	return result_cb("12345678123456781234567812345678", 32);
-}
-
-int main(void)
-{
-	init_socket();
-	getKey(&socket_callback);
-	cleanup_socket();
-
-	return EXIT_SUCCESS;
 }

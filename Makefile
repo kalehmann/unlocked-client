@@ -1,12 +1,23 @@
 CC = gcc
-CC_FLAGS = -Wall -Wextra -static
+CC_FLAGS = -O0 -g -Wall -Wextra -fanalyzer -lcurl -lcrypto -lssl
 
 all: bin/client
 
-bin/client: src/client.c
-	$(CC) $(CC_FLAGS) -o $@ $<
+SRC = \
+	src/client.c \
+	src/error.c \
+	src/http-client.c
+OBJECTS = $(patsubst src/%.c,obj/%.o,$(SRC))
+
+obj/%.o: src/%.c src/%.h 
+	$(CC) $(CC_FLAGS) -c $< -o $@
+
+bin/client: src/main.c $(OBJECTS)
+	$(CC) $(CC_FLAGS) -o $@ $< $(OBJECTS)
 
 clean:
+	@echo $(OBJECTS)
 	rm -rf bin/client
+	rm -rf obj/*.o
 
 .PHONY: all clean
