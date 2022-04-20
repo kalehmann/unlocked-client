@@ -22,7 +22,7 @@
 #include <string.h>
 #include <time.h>
 #include "error.h"
-#include "http-client.h"
+#include "https-client.h"
 #include <curl/curl.h>
 #include <openssl/hmac.h>
 #include <openssl/evp.h>

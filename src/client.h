@@ -21,7 +21,6 @@
 #define UNLOCKED_CLIENT_H
 
 #include "cli.h"
-#include "http-client.h"
 
 void request_key(struct arguments * arguments);
 

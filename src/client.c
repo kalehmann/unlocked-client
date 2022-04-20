@@ -19,6 +19,7 @@
 
 #include <stdlib.h>
 #include "client.h"
+#include "https-client.h"
 
 void request_key(struct arguments * arguments)
 {

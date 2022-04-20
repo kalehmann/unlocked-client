@@ -7,7 +7,7 @@ SRC = \
 	src/cli.c \
 	src/client.c \
 	src/error.c \
-	src/http-client.c \
+	src/https-client.c \
 	src/sockets.c
 OBJECTS = $(patsubst src/%.c,obj/%.o,$(SRC))
 
