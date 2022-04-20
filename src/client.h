@@ -17,44 +17,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef UNLOCKED_CLIENT_H
+#define UNLOCKED_CLIENT_H
+
 #include "cli.h"
-#include "client.h"
+#include "http-client.h"
 
-const char *argp_program_version =
-  "unlocked-client dev";
-const char *argp_program_bug_address =
-  "<mail@kalehmann.de>";
+void request_key(struct arguments * arguments);
 
-int main(int argc, char **argv)
-{
-	struct arguments arguments = {
-		.no_validation = 0,
-		.port = 443,
-	};
-
-	handle_args(argc, argv, &arguments);
-	if (NULL == arguments.host) {
-		fprintf(stderr, "No hostname given\n");
-
-		return EXIT_FAILURE;
-	}
-	if (0 == arguments.port) {
-		fprintf(stderr, "Invalid port given\n");
-
-		return EXIT_FAILURE;
-	}
-	if (NULL == arguments.secret) {
-		fprintf(stderr, "No secret given\n");
-
-		return EXIT_FAILURE;
-	}
-	if (NULL == arguments.username) {
-		fprintf(stderr, "No username given\n");
-
-		return EXIT_FAILURE;
-	}
-
-	request_key(&arguments);
-
-	return EXIT_SUCCESS;
-}
+#endif
