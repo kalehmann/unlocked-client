@@ -17,55 +17,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef UNLOCKED_HTTP_CLIENT_H
-#define UNLOCKED_HTTP_CLIENT_H
+#ifndef UNLOCKED_CLI_H
+#define UNLOCKED_CLI_H
 
-#include <curl/curl.h>
-#include "error.h"
+#include <argp.h>
 
-struct Request {
-	char * body;
+struct arguments
+{
+	char * key_handle;
+	char * host;
 	long port;
 	char * secret;
-	int skip_validation;
-	char * url;
 	char * username;
+	int no_validation;
 };
 
-
-struct Response {
-	char * body;
-	size_t body_len;
-	struct curl_slist * headers;
-	long status;
-};
-
-/**
- *
- */
-struct Response * create_response(void);
-
-/**
- *
- */
-void free_response(struct Response * response);
-
-/**
- * Initializes the http client.
- *
- * @return a status code indicating any error that occured.
- */
-enum unlocked_err init_https_client(void);
-
-/**
- *
- */
-enum unlocked_err https_hmac_POST(struct Request * request,
-				  struct Response * response);
-
-/**
- * Cleanup after the http client.
- */
-void cleanup_https_client(void);
+void handle_args(int argc, char ** argv, struct arguments * args);
 
 #endif

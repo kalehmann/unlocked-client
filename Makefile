@@ -4,6 +4,7 @@ CC_FLAGS = -O0 -g -Wall -Wextra -fanalyzer -lcurl -lcrypto -lssl
 all: bin/client
 
 SRC = \
+	src/cli.c \
 	src/client.c \
 	src/error.c \
 	src/http-client.c
