@@ -20,7 +20,25 @@
 #ifndef UNLOCKED_HTTP_CLIENT_H
 #define UNLOCKED_HTTP_CLIENT_H
 
+#include <curl/curl.h>
 #include "error.h"
+
+struct Response {
+	char * body;
+	size_t body_len;
+	struct curl_slist * headers;
+	long status;
+};
+
+/**
+ *
+ */
+struct Response * create_response(void);
+
+/**
+ *
+ */
+void free_response(struct Response * response);
 
 /**
  * Initializes the http client.

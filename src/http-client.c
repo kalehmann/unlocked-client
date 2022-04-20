@@ -27,15 +27,44 @@
 #include <openssl/hmac.h>
 #include <openssl/evp.h>
 
-CURL *curl;
-
 static char * authHeader(struct curl_slist * headers, const char * username,
 			 const char * key, const char * body);
 static char * dateHeader(void);
+static size_t header_callback(char *buffer, size_t size, size_t nitems,
+			      void *userdata);
 static const char * hmac_sha512(const char * const key,
 				const char * const message);
 static char * joinHeaderNames(struct curl_slist * header_list);
 static void strToLower(char * str);
+static size_t write_callback(char *ptr, size_t size, size_t nmemb,
+			     void *userdata);
+
+struct Response * create_response(void)
+{
+	struct Response * resp = malloc(sizeof(struct Response));
+	if (NULL == resp) {
+		return NULL;
+	}
+	resp->body = NULL;
+	resp->body_len = 0;
+	resp->headers = NULL;
+	resp->status = 0;
+
+	return resp;
+}
+
+void free_response(struct Response * response)
+{
+	if (NULL == response) {
+		return;
+	}
+	if (response->body) {
+		free(response->body);
+	}
+	curl_slist_free_all(response->headers);
+
+	free(response);
+}
 
 enum unlocked_err init_https_client(void)
 {
@@ -47,7 +76,6 @@ enum unlocked_err init_https_client(void)
 
 		return UL_CURL;
 	}
-	curl = curl_easy_init();
 
 	return UL_OK;
 }
@@ -56,54 +84,69 @@ enum unlocked_err https_hmac_POST(const char * username, const char * secret,
 				  const char * url, long port,
 				  const char * body)
 {
+	CURL *curl;
 	CURLcode status;
-	struct curl_slist *headers = NULL;
+	struct Response * resp = NULL;
+	struct curl_slist * headers = NULL;
 	char * auth_header = NULL;
 	char * date_header = dateHeader();
 	if (NULL == date_header) {
 		return UL_MALLOC;
 	}
+	curl = curl_easy_init();
 
 	headers = curl_slist_append(headers, date_header);
+	free(date_header);
 	auth_header = authHeader(headers, username, secret, body);
 	if (NULL == auth_header) {
-		free(date_header);
 		curl_slist_free_all(headers);
 
 		return UL_MALLOC;
 	}
 	headers = curl_slist_append(headers, auth_header);
+	free(auth_header);
 	headers = curl_slist_append(headers, "Accept: application/json");
 	headers = curl_slist_append(headers, "Content-Type: application/json; charsets: utf-8");
 
 	if (!curl) {
-		free(auth_header);
-		free(date_header);
 		curl_slist_free_all(headers);
 
 		return UL_CURL;
+	}
+	resp = create_response();
+	if (NULL == resp) {
+		curl_slist_free_all(headers);
+
+		return UL_MALLOC;
 	}
 	curl_easy_setopt(curl, CURLOPT_URL, url);
 	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
 	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
 	curl_easy_setopt(curl, CURLOPT_PORT, port);
 	curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+	curl_easy_setopt(curl, CURLOPT_HEADERDATA, resp);
+	curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_callback);
 	curl_easy_setopt(curl, CURLOPT_POSTFIELDS, body);
+	curl_easy_setopt(curl, CURLOPT_WRITEDATA, resp);
+	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
 
 	status = curl_easy_perform(curl);
+	curl_easy_cleanup(curl);
+	curl_slist_free_all(headers);
 	if (CURLE_OK != status) {
+		free_response(resp);
 		fprintf(stderr, "libcurl error: %s \n",
 			curl_easy_strerror(status));
 
 		return UL_CURL;
 	}
+	free_response(resp);
 
 	return UL_OK;
 }
 
 void cleanup_https_client(void)
 {
-	curl_easy_cleanup(curl);
 	curl_global_cleanup();
 }
 
@@ -229,6 +272,32 @@ static char * dateHeader(void)
 }
 
 /**
+ *
+ */
+static size_t header_callback(char *buffer, size_t size, size_t nitems,
+			      void *userdata)
+{
+	size_t length = size * nitems;
+	char * header = NULL;
+	struct Response * resp = userdata;
+
+	if (NULL == memchr(buffer, ':', length)) {
+		// No header
+		return length;
+	}
+	header = malloc(length + 1);
+	if (NULL == header) {
+		return 0;
+	}
+	memcpy(header, buffer, length);
+	header[length] = '\0';
+	resp->headers = curl_slist_append(resp->headers, header);
+	free(header);
+
+	return length;
+}
+
+/**
  * Generates a HMAC using SHA512.
  *
  * @param key is the secret key.
@@ -314,4 +383,34 @@ static void strToLower(char * str)
 	for (int i = 0; str[i]; i++) {
 		str[i] = tolower(str[i]);
 	}
+}
+
+/**
+ *
+ */
+static size_t write_callback(char *ptr, size_t size, size_t nmemb,
+			     void *userdata)
+{
+	size_t length = size * nmemb;
+	struct Response * resp = userdata;
+
+	if (NULL == resp->body) {
+		resp->body = malloc(length + 2);
+		if (NULL == resp->body) {
+			return 0;
+		}
+	} else {
+		resp->body = realloc(resp->body,
+				     resp->body_len + length + 2);
+		if (NULL == resp->body) {
+			return 0;
+		}
+	}
+	memcpy(resp->body + resp->body_len, ptr, length);
+	resp->body_len += length;
+	resp->body[resp->body_len] = '\n';
+	resp->body[resp->body_len + 1] = '\0';
+
+	return length;
+
 }
