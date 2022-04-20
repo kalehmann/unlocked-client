@@ -18,8 +18,8 @@
  */
 
 #include "cli.h"
-#include "client.h"
 #include "http-client.h"
+#include "sockets.h"
 
 const char *argp_program_version =
   "unlocked-client dev";

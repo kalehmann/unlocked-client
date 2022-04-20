@@ -5,9 +5,9 @@ all: bin/client
 
 SRC = \
 	src/cli.c \
-	src/client.c \
 	src/error.c \
-	src/http-client.c
+	src/http-client.c \
+	src/sockets.c
 OBJECTS = $(patsubst src/%.c,obj/%.o,$(SRC))
 
 obj/%.o: src/%.c src/%.h 
