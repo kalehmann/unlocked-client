@@ -161,6 +161,7 @@ enum unlocked_err https_hmac_POST(struct Request * request,
 	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
 
 	status = curl_easy_perform(curl);
+	curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &(response->status));
 	curl_easy_cleanup(curl);
 	curl_slist_free_all(headers);
 	if (CURLE_OK != status) {
