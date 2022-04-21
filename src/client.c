@@ -19,48 +19,35 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include "cJSON.h"
 #include "client.h"
 #include "https-client.h"
 #include "log.h"
+
+static char * get_key_request_body(const char * const handle);
+static char * get_key_request_url(const char * const host);
+static int get_request_id(struct Response * response);
 
 void request_key(struct arguments * arguments)
 {
 	struct Request request = { 0 };
 	struct Response * response = create_response();
-	char * body = NULL;
-	long body_len = 0;
 	char * content_type = NULL;
-	char * url = NULL;
-	long url_len = 0;
+	int request_id = 0;
 
-	body_len = snprintf(NULL, 0, "{\"key\": \"%s\"}", arguments->key_handle);
-	body = malloc(body_len + 1);
-	if (NULL == body) {
+	request.body = get_key_request_body(arguments->key_handle);
+	if (NULL == request.body) {
 		return;
 	}
-	if (0 > snprintf(body, body_len + 1, "{\"key\": \"%s\"}",
-			 arguments->key_handle)) {
-		free(body);
-
-		return;
-	}
-	url_len = snprintf(NULL, 0, "https://%s/api/requests", arguments->host);
-	url = malloc(url_len + 1);
-	if (NULL == url) {
-		return;
-	}
-	if (0 > snprintf(url, url_len + 1, "https://%s/api/requests",
-			 arguments->host)) {
-		free(body);
-		free(url);
-
-		return;
-	}
-	request.body = body;
 	request.port = arguments->port;
 	request.secret = arguments->secret;
 	request.skip_validation = arguments->no_validation;
-	request.url = url;
+	request.url = get_key_request_url(arguments->host);
+	if (NULL == request.body) {
+		free(request.body);
+
+		return;
+	}
 	request.username = arguments->username;
 
 	init_https_client();
@@ -77,9 +64,116 @@ void request_key(struct arguments * arguments)
 		}
 		free(content_type);
 	}
+	request_id = get_request_id(response);
+	printf("ID: %d\n", request_id);
 	printf(response->body);
 	cleanup_https_client();
 	free_response(response);
-	free(body);
-	free(url);
+	free(request.body);
+	free(request.url);
+}
+
+/**
+ * Get the body of the json request used to request access to a key.
+ *
+ * @param handle is the handle of the key that should be request.
+ *
+ * @return the body of the request that must be freed after use or NULL on
+ *         failure.
+ */
+static char * get_key_request_body(const char * const handle)
+{
+	char * body = NULL;
+	long body_len = 0;
+	static const char * const fmt = "{\"key\": \"%s\"}";
+
+	body_len = snprintf(NULL, 0, fmt, handle);
+	body = malloc(body_len + 1);
+	if (NULL == body) {
+		return NULL;
+	}
+	if (0 > snprintf(body, body_len + 1, fmt, handle)) {
+		free(body);
+
+		return NULL;
+	}
+
+	return body;
+}
+
+/**
+ * Get the url for the endpoint used to request access to a key.
+ *
+ * @param host is the hostname of the server.
+ *
+ * @return the url including the protocol or NULL on failure.
+ *         This value must be freed after use.
+ */
+static char * get_key_request_url(const char * const host)
+{
+	static const char * const fmt = "https://%s/api/requests";
+	char * url = NULL;
+	long url_len = 0;
+
+	url_len = snprintf(NULL, 0, fmt, host);
+	url = malloc(url_len + 1);
+	if (NULL == url) {
+		return NULL;
+	}
+	if (0 > snprintf(url, url_len + 1, fmt, host)) {
+		free(url);
+
+		return NULL;
+	}
+
+	return url;
+}
+
+/**
+ * Extract the id of the new request for a key from a
+ * response from the server.
+ *
+ * @param response the response with the serialized request.
+ *
+ * @return int the id of the request or 0 on failure.
+ */
+static int get_request_id(struct Response * response)
+{
+	cJSON * body_json = NULL, * id_elem = NULL;
+	int id = 0;
+
+	if (NULL == response) {
+		return id;
+	}
+
+	body_json = cJSON_Parse(response->body);
+	if (NULL == body_json) {
+		const char *error_ptr = cJSON_GetErrorPtr();
+		if (error_ptr != NULL) {
+			logger(LOG_ERROR, "Error before: %s\n", error_ptr);
+
+			return id;
+		}
+		logger(LOG_ERROR, "Error parsing response json\n");
+
+		return id;
+	}
+	id_elem = cJSON_GetObjectItemCaseSensitive(body_json, "id");
+	if (NULL == id_elem) {
+		logger(LOG_ERROR, "Key \"id\" not found\n");
+		cJSON_Delete(body_json);
+
+		return id;
+	}
+
+	if (0 == cJSON_IsNumber(id_elem)) {
+		logger(LOG_ERROR, "Value of key \"id\" is not numeric\n");
+		cJSON_Delete(body_json);
+
+		return id;
+	}
+	id = id_elem->valuedouble;
+	cJSON_Delete(body_json);
+
+	return id;
 }

@@ -1,5 +1,10 @@
 CC = gcc
-CC_FLAGS = -O0 -g -Wall -Wextra -fanalyzer -fsanitize=undefined -lcurl -lcrypto -lssl
+CC_FLAGS = \
+	-O0 -g \
+	-Wall -Wextra \
+	-fanalyzer -fsanitize=undefined \
+	-lcurl -lcrypto -lssl \
+	-Ivendor/cJSON
 
 all: bin/client
 
@@ -12,6 +17,10 @@ SRC = \
 	src/sockets.c
 HEADERS = $(patsubst src/%.c,src/%.h,$(SRC))
 OBJECTS = $(patsubst src/%.c,obj/%.o,$(SRC))
+OBJECTS += obj/cJSON.o
+
+obj/cJSON.o: vendor/cJSON/cJSON.c vendor/cJSON/cJSON.h
+	$(CC) $(CC_FLAGS) -c $< -o $@
 
 obj/%.o: src/%.c $(HEADERS)
 	$(CC) $(CC_FLAGS) -c $< -o $@
