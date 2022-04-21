@@ -18,8 +18,10 @@
  */
 
 #include <stdlib.h>
+#include <string.h>
 #include "client.h"
 #include "https-client.h"
+#include "log.h"
 
 void request_key(struct arguments * arguments)
 {
@@ -27,6 +29,7 @@ void request_key(struct arguments * arguments)
 	struct Response * response = create_response();
 	char * body = NULL;
 	long body_len = 0;
+	char * content_type = NULL;
 	char * url = NULL;
 	long url_len = 0;
 
@@ -62,6 +65,18 @@ void request_key(struct arguments * arguments)
 
 	init_https_client();
 	https_hmac_POST(&request, response);
+	content_type = get_content_type(response);
+	if (NULL == content_type) {
+		logger(LOG_WARNING,
+		       "No content-type given. Guessing application/json\n");
+	} else {
+		if (0 != strcmp(content_type, "application/json")) {
+			logger(LOG_WARNING,
+			       "Expected content-type is application/json, "
+			       "got \"%s\"\n", content_type);
+		}
+		free(content_type);
+	}
 	printf(response->body);
 	cleanup_https_client();
 	free_response(response);

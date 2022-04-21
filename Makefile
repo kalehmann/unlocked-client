@@ -1,5 +1,5 @@
 CC = gcc
-CC_FLAGS = -O0 -g -Wall -Wextra -fanalyzer -lcurl -lcrypto -lssl
+CC_FLAGS = -O0 -g -Wall -Wextra -fanalyzer -fsanitize=undefined -lcurl -lcrypto -lssl
 
 all: bin/client
 
@@ -8,13 +8,15 @@ SRC = \
 	src/client.c \
 	src/error.c \
 	src/https-client.c \
+	src/log.c \
 	src/sockets.c
+HEADERS = $(patsubst src/%.c,src/%.h,$(SRC))
 OBJECTS = $(patsubst src/%.c,obj/%.o,$(SRC))
 
-obj/%.o: src/%.c src/%.h 
+obj/%.o: src/%.c $(HEADERS)
 	$(CC) $(CC_FLAGS) -c $< -o $@
 
-bin/client: src/main.c $(OBJECTS)
+bin/client: src/main.c $(OBJECTS) $(HEADERS)
 	$(CC) $(CC_FLAGS) -o $@ $< $(OBJECTS)
 
 clean:

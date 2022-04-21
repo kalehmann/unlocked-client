@@ -25,6 +25,7 @@
 #include <time.h>
 #include "error.h"
 #include "https-client.h"
+#include "log.h"
 #include <curl/curl.h>
 #include <openssl/hmac.h>
 #include <openssl/evp.h>
