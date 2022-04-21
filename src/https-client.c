@@ -17,6 +17,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#define _GNU_SOURCE
+
 #include <ctype.h>
 #include <stdio.h>
 #include <string.h>
@@ -64,6 +66,40 @@ void free_response(struct Response * response)
 	curl_slist_free_all(response->headers);
 
 	free(response);
+}
+
+char * get_content_type(struct Response * response)
+{
+	static const char * const needle = "content-type";
+	struct curl_slist * iter = response->headers;
+	char * content_type = NULL;
+	size_t content_type_len = 0;
+	char * source = NULL;
+
+	while (iter) {
+		if (NULL != iter-> data
+		    && iter->data == strcasestr(iter->data, needle)) {
+			source = iter->data + strlen(needle);
+			while (':' == *source || ' ' == *source) {
+				source++;
+			}
+			// Ignore \r\n at the end of the header
+			content_type_len = strlen(source) - 2;
+			// Add one character for the null terminator.
+			content_type = malloc(content_type_len + 1);
+			if (NULL == content_type) {
+				return content_type;
+			}
+			memcpy(content_type, source, content_type_len);
+			content_type[content_type_len] = '\0';
+			strToLower(content_type);
+
+			return content_type;
+		}
+		iter = iter->next;
+	}
+
+	return content_type;
 }
 
 enum unlocked_err init_https_client(void)

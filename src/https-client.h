@@ -51,6 +51,17 @@ struct Response * create_response(void);
 void free_response(struct Response * response);
 
 /**
+ * Get the content type of a response.
+ *
+ * @param response is the response to get the content type for.
+ *
+ * @return the content type of the response or NULL if the content type is not
+ *         set. If the return value is not NULL, it must be freed after use.
+ *         The returned string will be all lower case and zero terminated.
+ */
+char * get_content_type(struct Response * response);
+
+/**
  * Initializes the http client.
  *
  * @return a status code indicating any error that occured.
