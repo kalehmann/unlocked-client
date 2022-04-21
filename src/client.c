@@ -27,12 +27,12 @@
 static char * get_key_request_body(const char * const handle);
 static char * get_key_request_url(const char * const host);
 static int get_request_id(struct Response * response);
+static void validate_content_type(struct Response * response);
 
 void request_key(struct arguments * arguments)
 {
 	struct Request request = { 0 };
 	struct Response * response = create_response();
-	char * content_type = NULL;
 	int request_id = 0;
 
 	request.body = get_key_request_body(arguments->key_handle);
@@ -52,21 +52,9 @@ void request_key(struct arguments * arguments)
 
 	init_https_client();
 	https_hmac_POST(&request, response);
-	content_type = get_content_type(response);
-	if (NULL == content_type) {
-		logger(LOG_WARNING,
-		       "No content-type given. Guessing application/json\n");
-	} else {
-		if (0 != strcmp(content_type, "application/json")) {
-			logger(LOG_WARNING,
-			       "Expected content-type is application/json, "
-			       "got \"%s\"\n", content_type);
-		}
-		free(content_type);
-	}
+	validate_content_type(response);
 	request_id = get_request_id(response);
 	printf("ID: %d\n", request_id);
-	printf(response->body);
 	cleanup_https_client();
 	free_response(response);
 	free(request.body);
@@ -176,4 +164,34 @@ static int get_request_id(struct Response * response)
 	cJSON_Delete(body_json);
 
 	return id;
+}
+
+/**
+ * Log an error when the content type of the response is not
+ * "application/json".
+ *
+ * @param response is the response to check.
+ */
+static void validate_content_type(struct Response * response)
+{
+	char * content_type = NULL;
+
+	if (NULL == response) {
+		return;
+	}
+
+	content_type = get_content_type(response);
+	if (NULL == content_type) {
+		logger(LOG_WARNING,
+		       "No content-type given. "
+		       "Guessing \"application/json\"\n");
+	} else {
+		if (0 != strcmp(content_type, "application/json")) {
+			logger(LOG_WARNING,
+			       "Expected content-type is \"application/json\""
+			       ", got \"%s\"\n", content_type);
+		}
+	}
+
+	free(content_type);
 }
