@@ -77,6 +77,12 @@ enum unlocked_err https_hmac_GET(struct Request * request,
 /**
  *
  */
+enum unlocked_err https_hmac_PATCH(struct Request * request,
+				   struct Response * response);
+
+/**
+ *
+ */
 enum unlocked_err https_hmac_POST(struct Request * request,
 				  struct Response * response);
 

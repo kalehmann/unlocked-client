@@ -19,6 +19,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include "cJSON.h"
 #include "client.h"
 #include "https-client.h"
@@ -27,6 +28,7 @@
 static char * get_key_request_body(const char * const handle);
 static char * get_key_request_url(const char * const host);
 static int get_request_id(struct Response * response);
+static char * get_request_state(struct Response * response);
 static char * get_show_request_url(const char * const host, int id);
 static void validate_content_type(struct Response * response);
 
@@ -35,6 +37,7 @@ void request_key(struct arguments * arguments)
 	struct Request request = { 0 };
 	struct Response * response = create_response();
 	int request_id = 0;
+	char * request_state = NULL;
 
 	request.body = get_key_request_body(arguments->key_handle);
 	if (NULL == request.body) {
@@ -68,13 +71,36 @@ void request_key(struct arguments * arguments)
 
 		return;
 	}
-	response = create_response();
-	https_hmac_GET(&request, response);
-	free(request.url);
+	do {
+		if (request_state) {
+			free(request_state);
+			request_state = NULL;
+		}
+		response = create_response();
+		https_hmac_GET(&request, response);
+		request_state = get_request_state(response);
+		free_response(response);
+		response = NULL;
 
-	printf(response->body);
+		sleep(5);
+	} while (request_state && strcmp(request_state, "ACCEPTED"));
+	free(request.url);
+	request.url = NULL;
+	if (request_state) {
+ 		free(request_state);
+		response = create_response();
+		request.body = "{\"state\": \"FULFILLED\"}";
+		request.url = get_show_request_url(arguments->host, request_id);
+		if (NULL == request.url) {
+			return;
+		}
+		https_hmac_PATCH(&request, response);
+		free(request.url);
+		printf(response->body);
+		free_response(response);
+	}
+
 	cleanup_https_client();
-	free_response(response);
 }
 
 /**
@@ -180,6 +206,65 @@ static int get_request_id(struct Response * response)
 	cJSON_Delete(body_json);
 
 	return id;
+}
+
+/**
+ * Extract the id of the new request for a key from a
+ * response from the server.
+ *
+ * @param response the response with the serialized request.
+ *
+ * @return a pointer to a string withthe request state, that must be freed after
+ *         use or NULL on failure.
+ */
+static char * get_request_state(struct Response * response)
+{
+	cJSON * body_json = NULL, * state_elem = NULL;
+	char * state = NULL;
+	size_t state_len = 0;
+
+	if (NULL == response) {
+		return state;
+	}
+
+	body_json = cJSON_Parse(response->body);
+	if (NULL == body_json) {
+		const char *error_ptr = cJSON_GetErrorPtr();
+		if (error_ptr != NULL) {
+			logger(LOG_ERROR, "Error before: %s\n", error_ptr);
+
+			return state;
+		}
+		logger(LOG_ERROR, "Error parsing response json\n");
+
+		return state;
+	}
+	state_elem = cJSON_GetObjectItemCaseSensitive(body_json, "state");
+	if (NULL == state_elem) {
+		logger(LOG_ERROR, "Key \"state\" not found\n");
+		cJSON_Delete(body_json);
+
+		return state;
+	}
+
+	if (0 == cJSON_IsString(state_elem) || NULL == state_elem->valuestring) {
+		logger(LOG_ERROR, "Value of key \"state\" is not a string\n");
+		cJSON_Delete(body_json);
+
+		return state;
+	}
+	state_len = strlen(state_elem->valuestring);
+	state = malloc(state_len + 1);
+	if (NULL == state) {
+		cJSON_Delete(body_json);
+
+		return state;
+	}
+	memcpy(state, state_elem->valuestring, state_len);
+	state[state_len] = '\0';
+	cJSON_Delete(body_json);
+
+	return state;
 }
 
 /**

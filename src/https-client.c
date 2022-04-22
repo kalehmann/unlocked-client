@@ -173,6 +173,65 @@ enum unlocked_err https_hmac_GET(struct Request * request,
 	return UL_OK;
 }
 
+enum unlocked_err https_hmac_PATCH(struct Request * request,
+				   struct Response * response)
+{
+	CURL *curl;
+	CURLcode status;
+	struct curl_slist * headers = NULL;
+	char * auth_header = NULL;
+	char * date_header = dateHeader();
+	if (NULL == date_header) {
+		return UL_MALLOC;
+	}
+	curl = curl_easy_init();
+
+	headers = curl_slist_append(headers, date_header);
+	free(date_header);
+	auth_header = authHeader(headers, request->username, request->secret,
+				 request->body);
+	if (NULL == auth_header) {
+		curl_slist_free_all(headers);
+
+		return UL_MALLOC;
+	}
+	headers = curl_slist_append(headers, auth_header);
+	free(auth_header);
+	headers = curl_slist_append(headers, "Accept: text/plain");
+	headers = curl_slist_append(headers, "Content-Type: application/json; charsets: utf-8");
+
+	if (!curl) {
+		curl_slist_free_all(headers);
+
+		return UL_CURL;
+	}
+
+	curl_easy_setopt(curl, CURLOPT_URL, request->url);
+	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+	curl_easy_setopt(curl, CURLOPT_PORT, request->port);
+	curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+	curl_easy_setopt(curl, CURLOPT_HEADERDATA, response);
+	curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_callback);
+	curl_easy_setopt(curl, CURLOPT_POSTFIELDS, request->body);
+	curl_easy_setopt(curl, CURLOPT_WRITEDATA, response);
+	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
+	curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PATCH");
+
+	status = curl_easy_perform(curl);
+	curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &(response->status));
+	curl_easy_cleanup(curl);
+	curl_slist_free_all(headers);
+	if (CURLE_OK != status) {
+		fprintf(stderr, "libcurl error: %s \n",
+			curl_easy_strerror(status));
+
+		return UL_CURL;
+	}
+
+	return UL_OK;
+}
+
 enum unlocked_err https_hmac_POST(struct Request * request,
 				  struct Response * response)
 {
