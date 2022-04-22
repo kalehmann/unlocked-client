@@ -27,6 +27,7 @@
 static char * get_key_request_body(const char * const handle);
 static char * get_key_request_url(const char * const host);
 static int get_request_id(struct Response * response);
+static char * get_show_request_url(const char * const host, int id);
 static void validate_content_type(struct Response * response);
 
 void request_key(struct arguments * arguments)
@@ -43,7 +44,7 @@ void request_key(struct arguments * arguments)
 	request.secret = arguments->secret;
 	request.skip_validation = arguments->no_validation;
 	request.url = get_key_request_url(arguments->host);
-	if (NULL == request.body) {
+	if (NULL == request.url) {
 		free(request.body);
 
 		return;
@@ -52,13 +53,28 @@ void request_key(struct arguments * arguments)
 
 	init_https_client();
 	https_hmac_POST(&request, response);
+	free(request.body);
+	request.body = NULL;
+	free(request.url);
+	request.url = NULL;
 	validate_content_type(response);
 	request_id = get_request_id(response);
+	free_response(response);
 	printf("ID: %d\n", request_id);
+
+	request.url = get_show_request_url(arguments->host, request_id);
+	if (NULL == request.url) {
+		free(request.url);
+
+		return;
+	}
+	response = create_response();
+	https_hmac_GET(&request, response);
+	free(request.url);
+
+	printf(response->body);
 	cleanup_https_client();
 	free_response(response);
-	free(request.body);
-	free(request.url);
 }
 
 /**
@@ -164,6 +180,35 @@ static int get_request_id(struct Response * response)
 	cJSON_Delete(body_json);
 
 	return id;
+}
+
+/**
+ * Get the url for the endpoint used to show a request for a key.
+ *
+ * @param host is the hostname of the server.
+ * @param id is the id of the request to show.
+ *
+ * @return the url including the protocol or NULL on failure.
+ *         This value must be freed after use.
+ */
+static char * get_show_request_url(const char * const host, int id)
+{
+	static const char * const fmt = "https://%s/api/requests/%d";
+	char * url = NULL;
+	long url_len = 0;
+
+	url_len = snprintf(NULL, 0, fmt, host, id);
+	url = malloc(url_len + 1);
+	if (NULL == url) {
+		return NULL;
+	}
+	if (0 > snprintf(url, url_len + 1, fmt, host, id)) {
+		free(url);
+
+		return NULL;
+	}
+
+	return url;
 }
 
 /**

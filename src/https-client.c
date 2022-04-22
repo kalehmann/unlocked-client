@@ -117,6 +117,62 @@ enum unlocked_err init_https_client(void)
 	return UL_OK;
 }
 
+enum unlocked_err https_hmac_GET(struct Request * request,
+				  struct Response * response)
+{
+	CURL *curl;
+	CURLcode status;
+	struct curl_slist * headers = NULL;
+	char * auth_header = NULL;
+	char * date_header = dateHeader();
+	if (NULL == date_header) {
+		return UL_MALLOC;
+	}
+	curl = curl_easy_init();
+
+	headers = curl_slist_append(headers, date_header);
+	free(date_header);
+	auth_header = authHeader(headers, request->username, request->secret,
+				 request->body);
+	if (NULL == auth_header) {
+		curl_slist_free_all(headers);
+
+		return UL_MALLOC;
+	}
+	headers = curl_slist_append(headers, auth_header);
+	free(auth_header);
+	headers = curl_slist_append(headers, "Accept: application/json");
+
+	if (!curl) {
+		curl_slist_free_all(headers);
+
+		return UL_CURL;
+	}
+
+	curl_easy_setopt(curl, CURLOPT_URL, request->url);
+	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+	curl_easy_setopt(curl, CURLOPT_PORT, request->port);
+	curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+	curl_easy_setopt(curl, CURLOPT_HEADERDATA, response);
+	curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, header_callback);
+	curl_easy_setopt(curl, CURLOPT_WRITEDATA, response);
+	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
+
+	status = curl_easy_perform(curl);
+	curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &(response->status));
+	curl_easy_cleanup(curl);
+	curl_slist_free_all(headers);
+	if (CURLE_OK != status) {
+		fprintf(stderr, "libcurl error: %s \n",
+			curl_easy_strerror(status));
+
+		return UL_CURL;
+	}
+
+	return UL_OK;
+}
+
 enum unlocked_err https_hmac_POST(struct Request * request,
 				  struct Response * response)
 {
@@ -202,12 +258,16 @@ static char * authHeader(struct curl_slist * headers, const char * username,
 	int auth_header_size = 0;
 	char * auth_header = NULL;
 	char * data_to_sign = NULL;
-	size_t data_to_sign_size = strlen(body) + 1;
+	size_t data_to_sign_size = 1;
 	const char * hex_digest = NULL;
 	struct curl_slist * header_iterator = headers;
 	char * header_names = joinHeaderNames(headers);
 	if (NULL == header_names) {
 		return NULL;
+	}
+
+	if (NULL != body) {
+		data_to_sign_size += strlen(body);
 	}
 
 	while (header_iterator) {
@@ -228,7 +288,9 @@ static char * authHeader(struct curl_slist * headers, const char * username,
 		strcat(data_to_sign, "\n");
 		header_iterator = header_iterator->next;
 	}
-	strcat(data_to_sign, body);
+	if (NULL != body) {
+		strcat(data_to_sign, body);
+	}
 	hex_digest = hmac_sha512(key, data_to_sign);
 	free(data_to_sign);
 
