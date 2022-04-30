@@ -63,7 +63,6 @@ void request_key(struct arguments * arguments)
 	validate_content_type(response);
 	request_id = get_request_id(response);
 	free_response(response);
-	printf("ID: %d\n", request_id);
 
 	request.url = get_show_request_url(arguments->host, request_id);
 	if (NULL == request.url) {
@@ -83,22 +82,41 @@ void request_key(struct arguments * arguments)
 		response = NULL;
 
 		sleep(5);
-	} while (request_state && strcmp(request_state, "ACCEPTED"));
+	} while (request_state && 0 == strcmp(request_state, "PENDING"));
 	free(request.url);
 	request.url = NULL;
-	if (request_state) {
- 		free(request_state);
-		response = create_response();
-		request.body = "{\"state\": \"FULFILLED\"}";
-		request.url = get_show_request_url(arguments->host, request_id);
-		if (NULL == request.url) {
-			return;
-		}
-		https_hmac_PATCH(&request, response);
-		free(request.url);
-		printf(response->body);
-		free_response(response);
+	if (NULL == request_state) {
+		logger(LOG_ERROR, "Could not determine state of request %d\n",
+		       request_id);
+		cleanup_https_client();
+
+		return;
 	}
+	if (0 == strcmp(request_state, "DENIED")) {
+		free(request_state);
+		logger(LOG_ERROR, "Request %d denied by server\n",
+		       request_id);
+
+		return;
+	}
+	if (strcmp(request_state, "ACCEPTED")) {
+		logger(LOG_ERROR, "Unexpected state for request %d: \"%s\"\n",
+		       request_id, request_state);
+		free(request_state);
+
+		return;
+	}
+	free(request_state);
+	response = create_response();
+	request.body = "{\"state\": \"FULFILLED\"}";
+	request.url = get_show_request_url(arguments->host, request_id);
+	if (NULL == request.url) {
+		return;
+	}
+	https_hmac_PATCH(&request, response);
+	printf(response->body);
+	free(request.url);
+	free_response(response);
 
 	cleanup_https_client();
 }
