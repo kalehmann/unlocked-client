@@ -21,6 +21,7 @@
 
 #include "cli.h"
 #include "client.h"
+#include "error.h"
 
 const char *argp_program_version =
   "unlocked-client dev";
@@ -29,6 +30,7 @@ const char *argp_program_bug_address =
 
 int main(int argc, char **argv)
 {
+	enum unlocked_err err = UL_OK;
 	struct arguments arguments = {
 		.no_validation = 0,
 		.port = 443,
@@ -56,7 +58,12 @@ int main(int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 
-	request_key(&arguments);
+	err = request_key(&arguments);
+	if (UL_OK != err) {
+		ul_error(err);
+
+		return EXIT_FAILURE;
+	}
 
 	return EXIT_SUCCESS;
 }

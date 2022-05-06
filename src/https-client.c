@@ -65,7 +65,6 @@ void free_response(struct Response * response)
 		free(response->body);
 	}
 	curl_slist_free_all(response->headers);
-
 	free(response);
 }
 

@@ -22,6 +22,7 @@
 #include <unistd.h>
 #include "cJSON.h"
 #include "client.h"
+#include "error.h"
 #include "https-client.h"
 #include "log.h"
 
@@ -32,7 +33,7 @@ static char * get_request_state(struct Response * response);
 static char * get_show_request_url(const char * const host, int id);
 static void validate_content_type(struct Response * response);
 
-void request_key(struct arguments * arguments)
+enum unlocked_err request_key(struct arguments * arguments)
 {
 	struct Request request = { 0 };
 	struct Response * response = create_response();
@@ -41,7 +42,7 @@ void request_key(struct arguments * arguments)
 
 	request.body = get_key_request_body(arguments->key_handle);
 	if (NULL == request.body) {
-		return;
+		return UL_MALLOC;
 	}
 	request.port = arguments->port;
 	request.secret = arguments->secret;
@@ -50,7 +51,7 @@ void request_key(struct arguments * arguments)
 	if (NULL == request.url) {
 		free(request.body);
 
-		return;
+		return UL_MALLOC;
 	}
 	request.username = arguments->username;
 
@@ -68,7 +69,7 @@ void request_key(struct arguments * arguments)
 	if (NULL == request.url) {
 		free(request.url);
 
-		return;
+		return UL_MALLOC;
 	}
 	do {
 		if (request_state) {
@@ -90,28 +91,28 @@ void request_key(struct arguments * arguments)
 		       request_id);
 		cleanup_https_client();
 
-		return;
+		return UL_ERR;
 	}
 	if (0 == strcmp(request_state, "DENIED")) {
 		free(request_state);
 		logger(LOG_ERROR, "Request %d denied by server\n",
 		       request_id);
 
-		return;
+		return UL_ERR;
 	}
 	if (strcmp(request_state, "ACCEPTED")) {
 		logger(LOG_ERROR, "Unexpected state for request %d: \"%s\"\n",
 		       request_id, request_state);
 		free(request_state);
 
-		return;
+		return UL_ERR;
 	}
 	free(request_state);
 	response = create_response();
 	request.body = "{\"state\": \"FULFILLED\"}";
 	request.url = get_show_request_url(arguments->host, request_id);
 	if (NULL == request.url) {
-		return;
+		return UL_MALLOC;
 	}
 	https_hmac_PATCH(&request, response);
 	printf(response->body);
@@ -119,6 +120,8 @@ void request_key(struct arguments * arguments)
 	free_response(response);
 
 	cleanup_https_client();
+
+	return UL_OK;
 }
 
 /**

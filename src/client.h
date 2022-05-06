@@ -21,7 +21,11 @@
 #define UNLOCKED_CLIENT_H
 
 #include "cli.h"
+#include "error.h"
 
-void request_key(struct arguments * arguments);
+/**
+ *
+ */
+enum unlocked_err request_key(struct arguments * arguments);
 
 #endif
