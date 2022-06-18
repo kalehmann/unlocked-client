@@ -15,7 +15,8 @@ SRC = \
 	src/https-client.c \
 	src/log.c \
 	src/sockets.c \
-	src/mod/module.c
+	src/mod/module.c \
+	src/mod/mod_stdout.c
 
 HEADERS = $(patsubst src/%.c,src/%.h,$(SRC))
 OBJECTS = $(patsubst src/%.c,obj/%.o,$(SRC))

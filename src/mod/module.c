@@ -27,9 +27,11 @@ enum unlocked_err cleanup_modules(void)
 	enum unlocked_err err = UL_OK;
 
 	for (unsigned int i = 0; i < module_count; i++) {
-		err = modules[i]->cleanup(modules[i]);
-		if (UL_OK != err) {
-			return err;
+		if (NULL != modules[i]->cleanup) {
+			err = modules[i]->cleanup(modules[i]);
+			if (UL_OK != err) {
+				return err;
+			}
 		}
 	}
 	free(modules);
@@ -42,9 +44,11 @@ enum unlocked_err handle_failure(enum unlocked_err provided_err)
 	enum unlocked_err err = UL_OK;
 
 	for (unsigned int i = 0; i < module_count; i++) {
-		err = modules[i]->failure(provided_err);
-		if (UL_OK != err) {
-			return err;
+		if (NULL != modules[i]->failure) {
+			err = modules[i]->failure(provided_err);
+			if (UL_OK != err) {
+				return err;
+			}
 		}
 	}
 
@@ -56,9 +60,11 @@ enum unlocked_err handle_success(const char * const key)
 	enum unlocked_err err = UL_OK;
 
 	for (unsigned int i = 0; i < module_count; i++) {
-		err = modules[i]->success(key);
-		if (UL_OK != err) {
-			return err;
+		if (NULL != modules[i]->success) {
+			err = modules[i]->success(key);
+			if (UL_OK != err) {
+				return err;
+			}
 		}
 	}
 
