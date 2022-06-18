@@ -26,6 +26,13 @@
 /**
  *
  */
+enum unlocked_err init_client();
+
+/**
+ *
+ */
 enum unlocked_err request_key(struct arguments * arguments);
+
+enum unlocked_err cleanup_client();
 
 #endif

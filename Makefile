@@ -14,7 +14,9 @@ SRC = \
 	src/error.c \
 	src/https-client.c \
 	src/log.c \
-	src/sockets.c
+	src/sockets.c \
+	src/mod/module.c
+
 HEADERS = $(patsubst src/%.c,src/%.h,$(SRC))
 OBJECTS = $(patsubst src/%.c,obj/%.o,$(SRC))
 OBJECTS += obj/cJSON.o
@@ -29,8 +31,8 @@ bin/client: src/main.c $(OBJECTS) $(HEADERS)
 	$(CC) $(CC_FLAGS) -o $@ $< $(OBJECTS)
 
 clean:
-	@echo $(OBJECTS)
+	find obj/ -name "*.o" | xargs rm -rf
 	rm -rf bin/client
-	rm -rf obj/*.o
 
 .PHONY: all clean
+
