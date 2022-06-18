@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef UNLOCKED_MOD_MODULE_H
+#ifndef UNLOCKED_MOD_STDOUT_H
 #define UNLOCKED_MOD_STDOUT_H
 
 #include "module.h"

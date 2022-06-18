@@ -22,6 +22,8 @@
 #include "cli.h"
 #include "client.h"
 #include "error.h"
+#include "mod/mmodule.h"
+#include "mod/mod_stdout.h"
 
 const char *argp_program_version =
   "unlocked-client dev";
@@ -58,12 +60,14 @@ int main(int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 
+	register_module(get_mod_stdout());
 	err = request_key(&arguments);
 	if (UL_OK != err) {
 		ul_error(err);
 
 		return EXIT_FAILURE;
 	}
+	cleanup_modules();
 
 	return EXIT_SUCCESS;
 }

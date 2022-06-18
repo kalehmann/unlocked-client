@@ -18,8 +18,16 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "module.h"
 #include "mod_stdout.h"
 #include "../error.h"
+
+static enum unlocked_err cleanup(struct unlocked_module * module)
+{
+	free(module);
+
+	return UL_OK;
+}
 
 static enum unlocked_err success(const char * const key)
 {
@@ -37,7 +45,7 @@ struct unlocked_module * get_mod_stdout(void)
 	module->init = NULL;
 	module->success = &success;
 	module->failure = NULL;
-	module->cleanup = NULL;
+	module->cleanup = &cleanup;
 
 	return module;
 }

@@ -25,6 +25,7 @@
 #include "error.h"
 #include "https-client.h"
 #include "log.h"
+#include "mod/module.h"
 
 static char * get_key_request_body(const char * const handle);
 static char * get_key_request_url(const char * const host);
@@ -115,7 +116,7 @@ enum unlocked_err request_key(struct arguments * arguments)
 		return UL_MALLOC;
 	}
 	https_hmac_PATCH(&request, response);
-	printf(response->body);
+	handle_success(response->body);
 	free(request.url);
 	free_response(response);
 
