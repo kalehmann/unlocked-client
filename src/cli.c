@@ -33,7 +33,6 @@ static char doc[] =
 
 static char args_doc[] = "KEY_HANDLE";
 
-
 static struct argp_option options[] = {
 	{
 		.name = "host",
@@ -73,6 +72,15 @@ static struct argp_option options[] = {
 	{ 0 }
 };
 
+/**
+ * Argp parser function.
+ *
+ * @param key specifies the argument or option passed to the func
+ * @param arg is the value for the argument or option
+ * @param state is the argp state where the arguments and options are saved to
+ *
+ * @return zero or any error that occured
+ */
 static error_t parse_opt (int key, char *arg, struct argp_state *state)
 {
 	struct arguments *arguments = state->input;
