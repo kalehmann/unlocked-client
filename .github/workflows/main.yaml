@@ -1,0 +1,14 @@
+---
+on: "push"  # yamllint disable-line rule:truthy
+
+jobs:
+        style-check:
+                runs-on: "ubuntu-latest"
+                name: "C style check"
+                steps:
+                        - uses: "actions/checkout@v3"
+                        - name: "Style check"
+                          uses: "./.github/actions/beautify"
+                          with:
+                                  src: "src"
+...

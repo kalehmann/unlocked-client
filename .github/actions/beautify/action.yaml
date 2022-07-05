@@ -1,0 +1,15 @@
+---
+name: "Beautify (C code)"
+author: "Karsten Lehmann <mail@kalehmann.de>"
+description: "Style check C code"
+inputs:
+        src:
+                description: "The path to the directory containing the source files"
+                required: true
+runs:
+        using: "docker"
+        image: "Dockerfile"
+        args:
+                - "stylecheck"
+                - "${{ inputs.src }}"
+...

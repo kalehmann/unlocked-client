@@ -1,0 +1,19 @@
+#! /usr/bin/env sh
+
+# Runs GNU indent on all C files and headers in a given directory.
+# If indent made any changes, the diff is printed and the script exits with
+# a non zero exit code
+
+set -x
+
+# As the `.git` directory is not owned by the current user, it is required to
+# mark the whole project directory as safe to execute `git diff`.
+# See https://github.com/git/git/commit/8959555cee7ec045958f9b6dd62e541affb7e7d9
+# for further details.
+git config --global --add safe.directory "${GITHUB_WORKSPACE}"
+
+indent $(find "${1}" -name "*.[ch]")
+
+# Check for changes and exit with a non zero code if changes where found
+git diff --exit-code
+exit $?
