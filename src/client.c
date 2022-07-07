@@ -27,19 +27,19 @@
 #include "log.h"
 #include "mod/module.h"
 
-static char * get_key_request_body(const char * const handle);
-static char * get_key_request_url(const char * const host);
-static int get_request_id(struct Response * response);
-static char * get_request_state(struct Response * response);
-static char * get_show_request_url(const char * const host, int id);
-static void validate_content_type(struct Response * response);
+static char *get_key_request_body(const char *const handle);
+static char *get_key_request_url(const char *const host);
+static int get_request_id(struct Response *response);
+static char *get_request_state(struct Response *response);
+static char *get_show_request_url(const char *const host, int id);
+static void validate_content_type(struct Response *response);
 
-enum unlocked_err request_key(struct arguments * arguments)
+enum unlocked_err request_key(struct arguments *arguments)
 {
 	struct Request request = { 0 };
-	struct Response * response = create_response();
+	struct Response *response = create_response();
 	int request_id = 0;
-	char * request_state = NULL;
+	char *request_state = NULL;
 
 	request.body = get_key_request_body(arguments->key_handle);
 	if (NULL == request.body) {
@@ -96,8 +96,7 @@ enum unlocked_err request_key(struct arguments * arguments)
 	}
 	if (0 == strcmp(request_state, "DENIED")) {
 		free(request_state);
-		logger(LOG_ERROR, "Request %d denied by server\n",
-		       request_id);
+		logger(LOG_ERROR, "Request %d denied by server\n", request_id);
 
 		return UL_ERR;
 	}
@@ -133,11 +132,11 @@ enum unlocked_err request_key(struct arguments * arguments)
  * @return the body of the request that must be freed after use or NULL on
  *         failure.
  */
-static char * get_key_request_body(const char * const handle)
+static char *get_key_request_body(const char *const handle)
 {
-	char * body = NULL;
+	char *body = NULL;
 	long body_len = 0;
-	static const char * const fmt = "{\"key\": \"%s\"}";
+	static const char *const fmt = "{\"key\": \"%s\"}";
 
 	body_len = snprintf(NULL, 0, fmt, handle);
 	body = malloc(body_len + 1);
@@ -161,10 +160,10 @@ static char * get_key_request_body(const char * const handle)
  * @return the url including the protocol or NULL on failure.
  *         This value must be freed after use.
  */
-static char * get_key_request_url(const char * const host)
+static char *get_key_request_url(const char *const host)
 {
-	static const char * const fmt = "https://%s/api/requests";
-	char * url = NULL;
+	static const char *const fmt = "https://%s/api/requests";
+	char *url = NULL;
 	long url_len = 0;
 
 	url_len = snprintf(NULL, 0, fmt, host);
@@ -189,9 +188,9 @@ static char * get_key_request_url(const char * const host)
  *
  * @return int the id of the request or 0 on failure.
  */
-static int get_request_id(struct Response * response)
+static int get_request_id(struct Response *response)
 {
-	cJSON * body_json = NULL, * id_elem = NULL;
+	cJSON *body_json = NULL, *id_elem = NULL;
 	int id = 0;
 
 	if (NULL == response) {
@@ -239,10 +238,10 @@ static int get_request_id(struct Response * response)
  * @return a pointer to a string withthe request state, that must be freed after
  *         use or NULL on failure.
  */
-static char * get_request_state(struct Response * response)
+static char *get_request_state(struct Response *response)
 {
-	cJSON * body_json = NULL, * state_elem = NULL;
-	char * state = NULL;
+	cJSON *body_json = NULL, *state_elem = NULL;
+	char *state = NULL;
 	size_t state_len = 0;
 
 	if (NULL == response) {
@@ -298,10 +297,10 @@ static char * get_request_state(struct Response * response)
  * @return the url including the protocol or NULL on failure.
  *         This value must be freed after use.
  */
-static char * get_show_request_url(const char * const host, int id)
+static char *get_show_request_url(const char *const host, int id)
 {
-	static const char * const fmt = "https://%s/api/requests/%d";
-	char * url = NULL;
+	static const char *const fmt = "https://%s/api/requests/%d";
+	char *url = NULL;
 	long url_len = 0;
 
 	url_len = snprintf(NULL, 0, fmt, host, id);
@@ -324,9 +323,9 @@ static char * get_show_request_url(const char * const host, int id)
  *
  * @param response is the response to check.
  */
-static void validate_content_type(struct Response * response)
+static void validate_content_type(struct Response *response)
 {
-	char * content_type = NULL;
+	char *content_type = NULL;
 
 	if (NULL == response) {
 		return;

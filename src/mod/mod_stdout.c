@@ -22,23 +22,23 @@
 #include "mod_stdout.h"
 #include "../error.h"
 
-static enum unlocked_err cleanup(struct unlocked_module * module)
+static enum unlocked_err cleanup(struct unlocked_module *module)
 {
 	free(module);
 
 	return UL_OK;
 }
 
-static enum unlocked_err success(const char * const key)
+static enum unlocked_err success(const char *const key)
 {
 	printf(key);
 
 	return UL_OK;
 }
 
-struct unlocked_module * get_mod_stdout(void)
+struct unlocked_module *get_mod_stdout(void)
 {
-	struct unlocked_module * module = malloc(sizeof(struct unlocked_module));
+	struct unlocked_module *module = malloc(sizeof(struct unlocked_module));
 	if (NULL == module) {
 		return NULL;
 	}

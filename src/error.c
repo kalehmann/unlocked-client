@@ -19,15 +19,15 @@
 
 #include "error.h"
 
-static const char * ERR_OK = "No error\n";
-static const char * ERR_CURL = "There was an error calling libcurl\n";
-static const char * ERR_ERR = "Logic error\n";
-static const char * ERR_MALLOC = "Failed to allocate memory\n";
-static const char * ERR_UNKNOWN = "Unknomn error\n";
+static const char *ERR_OK = "No error\n";
+static const char *ERR_CURL = "There was an error calling libcurl\n";
+static const char *ERR_ERR = "Logic error\n";
+static const char *ERR_MALLOC = "Failed to allocate memory\n";
+static const char *ERR_UNKNOWN = "Unknomn error\n";
 
-const char * ul_error(enum unlocked_err err)
+const char *ul_error(enum unlocked_err err)
 {
-	switch(err) {
+	switch (err) {
 	case UL_OK:
 		return ERR_OK;
 	case UL_CURL:

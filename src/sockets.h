@@ -26,8 +26,8 @@ void cleanup_socket(void);
 
 int init_socket(void);
 
-int socket_callback(char * key, size_t key_len);
+int socket_callback(char *key, size_t key_len);
 
-int getKey(int result_cb (char *, size_t));
+int getKey(int result_cb(char *, size_t));
 
 #endif

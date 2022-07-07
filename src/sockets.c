@@ -17,14 +17,14 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <stdio.h> /* EXIT_FAILURE, EXIT_SUCCESS */
-#include <stdlib.h> /* perror */
-#include <string.h> /* memset, strcpy */
-#include <unistd.h> /* close, sleep, unlink */
+#include <stdio.h>		/* EXIT_FAILURE, EXIT_SUCCESS */
+#include <stdlib.h>		/* perror */
+#include <string.h>		/* memset, strcpy */
+#include <unistd.h>		/* close, sleep, unlink */
 
-#include <sys/socket.h> /* accept, bind, listen, PF_UNIX, send, SOCK_STREAM, socket, socklen_t */
-#include <sys/stat.h> /* fchmod */
-#include <sys/un.h> /* struct sockaddr_un */
+#include <sys/socket.h>		/* accept, bind, listen, PF_UNIX, send, SOCK_STREAM, socket, socklen_t */
+#include <sys/stat.h>		/* fchmod */
+#include <sys/un.h>		/* struct sockaddr_un */
 
 #define SOCKET_PATH "test.sock"
 
@@ -55,7 +55,7 @@ int init_socket(void)
 	strcpy(addr.sun_path, SOCKET_PATH);
 	unlink(SOCKET_PATH);
 	fchmod(socket_fd, 777);
-	if (bind(socket_fd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
+	if (bind(socket_fd, (struct sockaddr *) &addr, sizeof(addr)) < 0) {
 		perror("Bind");
 		cleanup_socket();
 
@@ -72,14 +72,14 @@ int init_socket(void)
 	return EXIT_SUCCESS;
 }
 
-int socket_callback(char * key, size_t key_len)
+int socket_callback(char *key, size_t key_len)
 {
 	int clientfd, ret;
 	socklen_t clilen;
 	struct sockaddr_un cli_addr;
 
 	clilen = sizeof(cli_addr);
-	clientfd = accept(socket_fd, (struct sockaddr *)&cli_addr, &clilen);
+	clientfd = accept(socket_fd, (struct sockaddr *) &cli_addr, &clilen);
 	if (clientfd < 0) {
 		perror("Accept");
 		cleanup_socket();
@@ -97,7 +97,7 @@ int socket_callback(char * key, size_t key_len)
 	return EXIT_SUCCESS;
 }
 
-int getKey(int result_cb (char *, size_t))
+int getKey(int result_cb(char *, size_t))
 {
 	sleep(10);
 

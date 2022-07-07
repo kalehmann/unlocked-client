@@ -22,16 +22,15 @@
 
 #include <argp.h>
 
-struct arguments
-{
-	char * key_handle;
-	char * host;
+struct arguments {
+	char *key_handle;
+	char *host;
 	long port;
-	char * secret;
-	char * username;
+	char *secret;
+	char *username;
 	int no_validation;
 };
 
-void handle_args(int argc, char ** argv, struct arguments * args);
+void handle_args(int argc, char **argv, struct arguments *args);
 
 #endif

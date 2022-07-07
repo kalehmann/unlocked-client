@@ -18,7 +18,7 @@
 #include <stdlib.h>
 #include "module.h"
 
-static struct unlocked_module ** modules = NULL;
+static struct unlocked_module **modules = NULL;
 
 static unsigned int module_count = 0;
 
@@ -55,7 +55,7 @@ enum unlocked_err handle_failure(enum unlocked_err provided_err)
 	return err;
 }
 
-enum unlocked_err handle_success(const char * const key)
+enum unlocked_err handle_success(const char *const key)
 {
 	enum unlocked_err err = UL_OK;
 
@@ -71,10 +71,11 @@ enum unlocked_err handle_success(const char * const key)
 	return err;
 }
 
-enum unlocked_err register_module(struct unlocked_module * module)
+enum unlocked_err register_module(struct unlocked_module *module)
 {
 	modules = realloc(modules,
-			  sizeof(struct unlocked_module *) * (module_count + 1));
+			  sizeof(struct unlocked_module *) * (module_count +
+							      1));
 	if (NULL == modules) {
 		return UL_MALLOC;
 	}

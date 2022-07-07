@@ -34,6 +34,6 @@ enum unlocked_err {
  *
  * @return the human readable string describing the error.
  */
-const char * ul_error(enum unlocked_err err);
+const char *ul_error(enum unlocked_err err);
 
 #endif

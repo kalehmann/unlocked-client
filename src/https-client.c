@@ -30,21 +30,21 @@
 #include <openssl/hmac.h>
 #include <openssl/evp.h>
 
-static char * authHeader(struct curl_slist * headers, const char * username,
-			 const char * key, const char * body);
-static char * dateHeader(void);
+static char *authHeader(struct curl_slist *headers, const char *username,
+			const char *key, const char *body);
+static char *dateHeader(void);
 static size_t header_callback(char *buffer, size_t size, size_t nitems,
 			      void *userdata);
-static const char * hmac_sha512(const char * const key,
-				const char * const message);
-static char * joinHeaderNames(struct curl_slist * header_list);
-static void strToLower(char * str);
+static const char *hmac_sha512(const char *const key,
+			       const char *const message);
+static char *joinHeaderNames(struct curl_slist *header_list);
+static void strToLower(char *str);
 static size_t write_callback(char *ptr, size_t size, size_t nmemb,
 			     void *userdata);
 
-struct Response * create_response(void)
+struct Response *create_response(void)
 {
-	struct Response * resp = malloc(sizeof(struct Response));
+	struct Response *resp = malloc(sizeof(struct Response));
 	if (NULL == resp) {
 		return NULL;
 	}
@@ -56,7 +56,7 @@ struct Response * create_response(void)
 	return resp;
 }
 
-void free_response(struct Response * response)
+void free_response(struct Response *response)
 {
 	if (NULL == response) {
 		return;
@@ -68,16 +68,16 @@ void free_response(struct Response * response)
 	free(response);
 }
 
-char * get_content_type(struct Response * response)
+char *get_content_type(struct Response *response)
 {
-	static const char * const needle = "content-type";
-	struct curl_slist * iter = response->headers;
-	char * content_type = NULL;
+	static const char *const needle = "content-type";
+	struct curl_slist *iter = response->headers;
+	char *content_type = NULL;
 	size_t content_type_len = 0;
-	char * source = NULL;
+	char *source = NULL;
 
 	while (iter) {
-		if (NULL != iter-> data
+		if (NULL != iter->data
 		    && iter->data == strcasestr(iter->data, needle)) {
 			source = iter->data + strlen(needle);
 			while (':' == *source || ' ' == *source) {
@@ -116,14 +116,14 @@ enum unlocked_err init_https_client(void)
 	return UL_OK;
 }
 
-enum unlocked_err https_hmac_GET(struct Request * request,
-				  struct Response * response)
+enum unlocked_err https_hmac_GET(struct Request *request,
+				 struct Response *response)
 {
 	CURL *curl;
 	CURLcode status;
-	struct curl_slist * headers = NULL;
-	char * auth_header = NULL;
-	char * date_header = dateHeader();
+	struct curl_slist *headers = NULL;
+	char *auth_header = NULL;
+	char *date_header = dateHeader();
 	if (NULL == date_header) {
 		return UL_MALLOC;
 	}
@@ -172,14 +172,14 @@ enum unlocked_err https_hmac_GET(struct Request * request,
 	return UL_OK;
 }
 
-enum unlocked_err https_hmac_PATCH(struct Request * request,
-				   struct Response * response)
+enum unlocked_err https_hmac_PATCH(struct Request *request,
+				   struct Response *response)
 {
 	CURL *curl;
 	CURLcode status;
-	struct curl_slist * headers = NULL;
-	char * auth_header = NULL;
-	char * date_header = dateHeader();
+	struct curl_slist *headers = NULL;
+	char *auth_header = NULL;
+	char *date_header = dateHeader();
 	if (NULL == date_header) {
 		return UL_MALLOC;
 	}
@@ -197,7 +197,9 @@ enum unlocked_err https_hmac_PATCH(struct Request * request,
 	headers = curl_slist_append(headers, auth_header);
 	free(auth_header);
 	headers = curl_slist_append(headers, "Accept: text/plain");
-	headers = curl_slist_append(headers, "Content-Type: application/json; charsets: utf-8");
+	headers =
+		curl_slist_append(headers,
+				  "Content-Type: application/json; charsets: utf-8");
 
 	if (!curl) {
 		curl_slist_free_all(headers);
@@ -231,14 +233,14 @@ enum unlocked_err https_hmac_PATCH(struct Request * request,
 	return UL_OK;
 }
 
-enum unlocked_err https_hmac_POST(struct Request * request,
-				  struct Response * response)
+enum unlocked_err https_hmac_POST(struct Request *request,
+				  struct Response *response)
 {
 	CURL *curl;
 	CURLcode status;
-	struct curl_slist * headers = NULL;
-	char * auth_header = NULL;
-	char * date_header = dateHeader();
+	struct curl_slist *headers = NULL;
+	char *auth_header = NULL;
+	char *date_header = dateHeader();
 	if (NULL == date_header) {
 		return UL_MALLOC;
 	}
@@ -256,7 +258,9 @@ enum unlocked_err https_hmac_POST(struct Request * request,
 	headers = curl_slist_append(headers, auth_header);
 	free(auth_header);
 	headers = curl_slist_append(headers, "Accept: application/json");
-	headers = curl_slist_append(headers, "Content-Type: application/json; charsets: utf-8");
+	headers =
+		curl_slist_append(headers,
+				  "Content-Type: application/json; charsets: utf-8");
 
 	if (!curl) {
 		curl_slist_free_all(headers);
@@ -308,18 +312,18 @@ void cleanup_https_client(void)
  *
  * @return a string with the header that must be freed after use.
  */
-static char * authHeader(struct curl_slist * headers, const char * username,
-			 const char * key, const char * body)
+static char *authHeader(struct curl_slist *headers, const char *username,
+			const char *key, const char *body)
 {
-	const char * const auth_fmt = "Authorization: hmac username=\"%s\", "
+	const char *const auth_fmt = "Authorization: hmac username=\"%s\", "
 		"algorithm=\"sha512\", headers=\"%s\", signature=\"%s\"";
 	int auth_header_size = 0;
-	char * auth_header = NULL;
-	char * data_to_sign = NULL;
+	char *auth_header = NULL;
+	char *data_to_sign = NULL;
 	size_t data_to_sign_size = 1;
-	const char * hex_digest = NULL;
-	struct curl_slist * header_iterator = headers;
-	char * header_names = joinHeaderNames(headers);
+	const char *hex_digest = NULL;
+	struct curl_slist *header_iterator = headers;
+	char *header_names = joinHeaderNames(headers);
 	if (NULL == header_names) {
 		return NULL;
 	}
@@ -384,16 +388,18 @@ static char * authHeader(struct curl_slist * headers, const char * username,
  *
  * @return char * a pointer to the date header, that MUST be freed after use.
  */
-static char * dateHeader(void)
+static char *dateHeader(void)
 {
-	char * header = NULL;
-	static const char * const header_fmt =
+	char *header = NULL;
+	static const char *const header_fmt =
 		"Date: %s, %02d %s %d %02d:%02d:%02d GMT";
 	int header_length = 0;
-	static const char * const days[] = {"Mon", "Tue", "Wed", "Thu", "Fri",
-			"Sat", "Sun"};
-	static const char * const months[] = {"Jan", "Feb", "Mar", "Apr", "May",
-			"Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+	static const char *const days[] = { "Mon", "Tue", "Wed", "Thu", "Fri",
+		"Sat", "Sun"
+	};
+	static const char *const months[] = { "Jan", "Feb", "Mar", "Apr", "May",
+		"Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+	};
 	time_t epoch = time(NULL);
 	struct tm *tm = gmtime(&epoch);
 
@@ -428,8 +434,8 @@ static size_t header_callback(char *buffer, size_t size, size_t nitems,
 			      void *userdata)
 {
 	size_t length = size * nitems;
-	char * header = NULL;
-	struct Response * resp = userdata;
+	char *header = NULL;
+	struct Response *resp = userdata;
 
 	if (NULL == memchr(buffer, ':', length)) {
 		// No header
@@ -457,15 +463,13 @@ static size_t header_callback(char *buffer, size_t size, size_t nitems,
  *         This string is 128 characters long (and an additional zero byte).
  *         It must not be freed.
  */
-static const char * hmac_sha512(const char * const key,
-				const char * const message)
+static const char *hmac_sha512(const char *const key, const char *const message)
 {
-	const unsigned char * digest = NULL;
+	const unsigned char *digest = NULL;
 	static char hex_digest[129] = { 0 };
 
 	digest = HMAC(EVP_sha512(), key, strlen(key),
-		      (unsigned char *)message, strlen(message),
-		      NULL, NULL);
+		      (unsigned char *) message, strlen(message), NULL, NULL);
 	for (int i = 0; i < 64; i++) {
 		sprintf(hex_digest + i * 2, "%02X", digest[i]);
 	}
@@ -481,11 +485,11 @@ static const char * hmac_sha512(const char * const key,
  *
  * @return the header names joined by single spaces.
  */
-static char * joinHeaderNames(struct curl_slist * header_list)
+static char *joinHeaderNames(struct curl_slist *header_list)
 {
-	const char * separator = NULL;
-	struct curl_slist * header_iterator = header_list;
-	char * headers = NULL;
+	const char *separator = NULL;
+	struct curl_slist *header_iterator = header_list;
+	char *headers = NULL;
 	size_t headers_size = 1;
 	int offset = 0;
 
@@ -528,7 +532,7 @@ static char * joinHeaderNames(struct curl_slist * header_list)
  *
  * @param str the string to convert to lower case.
  */
-static void strToLower(char * str)
+static void strToLower(char *str)
 {
 	for (int i = 0; str[i]; i++) {
 		str[i] = tolower(str[i]);
@@ -542,7 +546,7 @@ static size_t write_callback(char *ptr, size_t size, size_t nmemb,
 			     void *userdata)
 {
 	size_t length = size * nmemb;
-	struct Response * resp = userdata;
+	struct Response *resp = userdata;
 
 	if (NULL == resp->body) {
 		resp->body = malloc(length + 2);
@@ -550,8 +554,7 @@ static size_t write_callback(char *ptr, size_t size, size_t nmemb,
 			return 0;
 		}
 	} else {
-		resp->body = realloc(resp->body,
-				     resp->body_len + length + 2);
+		resp->body = realloc(resp->body, resp->body_len + length + 2);
 		if (NULL == resp->body) {
 			return 0;
 		}

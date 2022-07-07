@@ -22,10 +22,10 @@
 #include "../error.h"
 
 struct unlocked_module {
-	enum unlocked_err (*init)(struct unlocked_module *);
-	enum unlocked_err (*success)(const char * const);
-	enum unlocked_err (*failure)(enum unlocked_err);
-	enum unlocked_err (*cleanup)(struct unlocked_module *);
+	enum unlocked_err (*init) (struct unlocked_module *);
+	enum unlocked_err (*success) (const char *const);
+	enum unlocked_err (*failure) (enum unlocked_err);
+	enum unlocked_err (*cleanup) (struct unlocked_module *);
 };
 
 /**
@@ -51,7 +51,7 @@ enum unlocked_err handle_failure(enum unlocked_err err);
  *
  * @return any error from the modules
  */
-enum unlocked_err handle_success(const char * const key);
+enum unlocked_err handle_success(const char *const key);
 
 /**
  * Registers a new module for the application.
@@ -60,7 +60,6 @@ enum unlocked_err handle_success(const char * const key);
  *
  * @returns any error that occured
  */
-enum unlocked_err register_module(struct unlocked_module * module);
-
+enum unlocked_err register_module(struct unlocked_module *module);
 
 #endif

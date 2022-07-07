@@ -24,31 +24,30 @@
 #include "error.h"
 
 struct Request {
-	char * body;
+	char *body;
 	long port;
-	char * secret;
+	char *secret;
 	int skip_validation;
-	char * url;
-	char * username;
+	char *url;
+	char *username;
 };
 
-
 struct Response {
-	char * body;
+	char *body;
 	size_t body_len;
-	struct curl_slist * headers;
+	struct curl_slist *headers;
 	long status;
 };
 
 /**
  *
  */
-struct Response * create_response(void);
+struct Response *create_response(void);
 
 /**
  *
  */
-void free_response(struct Response * response);
+void free_response(struct Response *response);
 
 /**
  * Get the content type of a response.
@@ -59,7 +58,7 @@ void free_response(struct Response * response);
  *         set. If the return value is not NULL, it must be freed after use.
  *         The returned string will be all lower case and zero terminated.
  */
-char * get_content_type(struct Response * response);
+char *get_content_type(struct Response *response);
 
 /**
  * Initializes the http client.
@@ -71,20 +70,20 @@ enum unlocked_err init_https_client(void);
 /**
  *
  */
-enum unlocked_err https_hmac_GET(struct Request * request,
-				 struct Response * response);
+enum unlocked_err https_hmac_GET(struct Request *request,
+				 struct Response *response);
 
 /**
  *
  */
-enum unlocked_err https_hmac_PATCH(struct Request * request,
-				   struct Response * response);
+enum unlocked_err https_hmac_PATCH(struct Request *request,
+				   struct Response *response);
 
 /**
  *
  */
-enum unlocked_err https_hmac_POST(struct Request * request,
-				  struct Response * response);
+enum unlocked_err https_hmac_POST(struct Request *request,
+				  struct Response *response);
 
 /**
  * Cleanup after the http client.

@@ -27,6 +27,6 @@
  *
  * @return a pointer to the module
  */
-struct unlocked_module * get_mod_stdout(void);
+struct unlocked_module *get_mod_stdout(void);
 
 #endif

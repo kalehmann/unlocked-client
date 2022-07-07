@@ -20,19 +20,17 @@
 #include <stdlib.h>
 #include "cli.h"
 
-
 #define	OPT_HOST 'h'
 #define	OPT_PORT 'p'
 #define OPT_SECRET 's'
 #define OPT_USER 'u'
 #define OPT_SKIP_VALIDATION 256
 
-
-static char doc[] =
-  "unlocked-client -- a tool to fetch keys from a server";
+static char doc[] = "unlocked-client -- a tool to fetch keys from a server";
 
 static char args_doc[] = "KEY_HANDLE";
 
+// *INDENT-OFF*
 static struct argp_option options[] = {
 	{
 		.name = "host",
@@ -71,6 +69,7 @@ static struct argp_option options[] = {
 	},
 	{ 0 }
 };
+// *INDENT-ON*
 
 /**
  * Argp parser function.
@@ -81,12 +80,11 @@ static struct argp_option options[] = {
  *
  * @return zero or any error that occured
  */
-static error_t parse_opt (int key, char *arg, struct argp_state *state)
+static error_t parse_opt(int key, char *arg, struct argp_state *state)
 {
 	struct arguments *arguments = state->input;
 
-	switch (key)
-	{
+	switch (key) {
 	case OPT_HOST:
 		arguments->host = arg;
 		break;
@@ -104,7 +102,7 @@ static error_t parse_opt (int key, char *arg, struct argp_state *state)
 		break;
 	case ARGP_KEY_ARG:
 		if (state->arg_num >= 1) {
-			argp_usage (state);
+			argp_usage(state);
 		}
 
 		arguments->key_handle = arg;
@@ -113,7 +111,7 @@ static error_t parse_opt (int key, char *arg, struct argp_state *state)
 
 	case ARGP_KEY_END:
 		if (state->arg_num < 1) {
-			argp_usage (state);
+			argp_usage(state);
 		}
 		break;
 	default:
@@ -123,6 +121,7 @@ static error_t parse_opt (int key, char *arg, struct argp_state *state)
 	return 0;
 }
 
+// *INDENT-OFF*
 static struct argp argp_client = {
 	.options = options,
 	.parser = parse_opt,
@@ -132,8 +131,9 @@ static struct argp argp_client = {
 	.help_filter = NULL,
 	.argp_domain = NULL,
 };
+// *INDENT-ON*
 
-void handle_args(int argc, char ** argv, struct arguments * args)
+void handle_args(int argc, char **argv, struct arguments *args)
 {
-	argp_parse (&argp_client, argc, argv, 0, 0, args);
+	argp_parse(&argp_client, argc, argv, 0, 0, args);
 }

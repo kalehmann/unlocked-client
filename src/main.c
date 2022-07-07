@@ -25,10 +25,8 @@
 #include "mod/mmodule.h"
 #include "mod/mod_stdout.h"
 
-const char *argp_program_version =
-  "unlocked-client dev";
-const char *argp_program_bug_address =
-  "<mail@kalehmann.de>";
+const char *argp_program_version = "unlocked-client dev";
+const char *argp_program_bug_address = "<mail@kalehmann.de>";
 
 int main(int argc, char **argv)
 {
