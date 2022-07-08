@@ -22,7 +22,7 @@
 #include "cli.h"
 #include "client.h"
 #include "error.h"
-#include "mod/mmodule.h"
+#include "mod/module.h"
 #include "mod/mod_stdout.h"
 
 const char *argp_program_version = "unlocked-client dev";
