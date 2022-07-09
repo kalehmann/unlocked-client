@@ -40,6 +40,7 @@ enum unlocked_err request_key(struct arguments *arguments)
 	struct Response *response = create_response();
 	int request_id = 0;
 	char *request_state = NULL;
+	enum unlocked_err err = UL_OK;
 
 	request.body = get_key_request_body(arguments->key_handle);
 	if (NULL == request.body) {
@@ -115,13 +116,12 @@ enum unlocked_err request_key(struct arguments *arguments)
 		return UL_MALLOC;
 	}
 	https_hmac_PATCH(&request, response);
-	handle_success(response->body);
+	err = handle_success(response->body);
 	free(request.url);
 	free_response(response);
-
 	cleanup_https_client();
 
-	return UL_OK;
+	return err;
 }
 
 /**

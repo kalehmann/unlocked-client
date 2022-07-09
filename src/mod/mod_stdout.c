@@ -18,6 +18,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "module.h"
 #include "mod_stdout.h"
 #include "../error.h"
@@ -31,7 +32,13 @@ static enum unlocked_err cleanup(struct unlocked_module *module)
 
 static enum unlocked_err success(const char *const key)
 {
-	printf(key);
+	size_t key_len = strlen(key);
+	if (key_len != fwrite(key, sizeof(char), key_len, stdout)) {
+		return UL_ERR;
+	}
+	if (fflush(stdout)) {
+		return UL_ERR;
+	}
 
 	return UL_OK;
 }
