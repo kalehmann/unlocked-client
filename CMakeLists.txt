@@ -15,7 +15,6 @@ add_subdirectory(vendor/libcheck)
 
 find_package( CURL REQUIRED )
 find_package( OpenSSL REQUIRED )
-target_link_libraries(unlocked-client PRIVATE CURL::libcurl OpenSSL::SSL)
-
+target_link_libraries( unlocked-client PRIVATE CURL::libcurl OpenSSL::SSL )
 enable_testing()
 add_test(NAME check_unlocked_client COMMAND check_unlocked_client)

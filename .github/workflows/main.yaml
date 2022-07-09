@@ -11,4 +11,17 @@ jobs:
                           uses: "./.github/actions/beautify"
                           with:
                                   src: "src"
+        unit-tests:
+                runs-on: "ubuntu-latest"
+                name: "C unit tests"
+                steps:
+                        - uses: "actions/checkout@v3"
+                          with:
+                                  submodules: true
+                        - name: "Install libcurl and OpenSSL"
+                          run: "sudo apt-get update && sudo apt-get install -yq libcurl4-openssl-dev libc6-dev libssl-dev"
+                        - name: "CMake"
+                          run: "cd build && cmake .. && make VERBOSE=1"
+                        - name: "Run tests"
+                          run: "cd build && make test"
 ...
