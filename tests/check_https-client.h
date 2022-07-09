@@ -17,35 +17,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef UNLOCKED_CHECK_HTTPS_CLIENT_H
+#define UNLOCKED_CHECK_HTTPS_CLIENT_H
+
 #include <check.h>
-#include <stdlib.h>
 
-#include "check_https-client.h"
+TCase *https_client_create_case(void);
 
-Suite *unlocked_client_suite(void)
-{
-	Suite *s;
-	TCase *tc_https_client;
-
-	s = suite_create("unlocked-client");
-	tc_https_client = https_client_create_case();
-	suite_add_tcase(s, tc_https_client);
-
-	return s;
-}
-
-int main(void)
-{
-	int number_failed;
-	Suite *s;
-	SRunner *sr;
-
-	s = unlocked_client_suite();
-	sr = srunner_create(s);
-
-	srunner_run_all(sr, CK_VERBOSE);
-	number_failed = srunner_ntests_failed(sr);
-	srunner_free(sr);
-
-	return (number_failed == 0) ? EXIT_SUCCESS : EXIT_FAILURE;
-}
+#endif

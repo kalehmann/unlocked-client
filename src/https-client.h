@@ -17,8 +17,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef UNLOCKED_HTTP_CLIENT_H
-#define UNLOCKED_HTTP_CLIENT_H
+#ifndef UNLOCKED_HTTPS_CLIENT_H
+#define UNLOCKED_HTTPS_CLIENT_H
 
 #include <curl/curl.h>
 #include "error.h"
