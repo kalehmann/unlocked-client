@@ -22,26 +22,13 @@
 
 #include "check_https-client.h"
 
-Suite *unlocked_client_suite(void)
-{
-	Suite *s;
-	TCase *tc_https_client;
-
-	s = suite_create("unlocked-client");
-	tc_https_client = https_client_create_case();
-	suite_add_tcase(s, tc_https_client);
-
-	return s;
-}
-
 int main(void)
 {
 	int number_failed;
-	Suite *s;
 	SRunner *sr;
 
-	s = unlocked_client_suite();
-	sr = srunner_create(s);
+	sr = srunner_create(NULL);
+	srunner_add_suite(sr, make_https_client_suite());
 
 	srunner_run_all(sr, CK_VERBOSE);
 	number_failed = srunner_ntests_failed(sr);

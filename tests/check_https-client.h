@@ -22,6 +22,6 @@
 
 #include <check.h>
 
-TCase *https_client_create_case(void);
+Suite *make_https_client_suite(void);
 
 #endif

@@ -92,14 +92,25 @@ START_TEST(test_get_content_type_uppercase)
 END_TEST
 // *INDENT-ON*
 
-TCase *https_client_create_case(void)
+static TCase *make_https_client_create_case(void)
 {
 	TCase *tc_https_client;
 
-	tc_https_client = tcase_create("unlocked-client https_client");
+	tc_https_client = tcase_create("https-client::get_content_type");
 	tcase_add_test(tc_https_client, test_get_content_type_no_header);
 	tcase_add_test(tc_https_client, test_get_content_type_lowercase);
 	tcase_add_test(tc_https_client, test_get_content_type_uppercase);
 
 	return tc_https_client;
+}
+
+Suite *make_https_client_suite(void)
+{
+	Suite *s;
+
+	s = suite_create("unlocked-client https-client");
+	suite_add_tcase(s, make_https_client_create_case());
+
+	return s;
+
 }
