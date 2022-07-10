@@ -45,6 +45,17 @@ struct Response {
 struct Response *create_response(void);
 
 /**
+ * Generates the date header with the current date formatted according to
+ * RFC7231.
+ *
+ * @param epoch is a pointer to the current time.
+ *              Pass NULL to obtain the current time with `time(NULL)`.
+ *
+ * @return a pointer to the date header, that MUST be freed after use.
+ */
+char *date_header(const time_t *epoch);
+
+/**
  *
  */
 void free_response(struct Response *response);

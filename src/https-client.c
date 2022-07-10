@@ -32,7 +32,6 @@
 
 static char *authHeader(struct curl_slist *headers, const char *username,
 			const char *key, const char *body);
-static char *dateHeader(void);
 static size_t header_callback(char *buffer, size_t size, size_t nitems,
 			      void *userdata);
 static const char *hmac_sha512(const char *const key,
@@ -66,6 +65,50 @@ void free_response(struct Response *response)
 	}
 	curl_slist_free_all(response->headers);
 	free(response);
+}
+
+char *date_header(const time_t *epoch)
+{
+	char *header = NULL;
+	static const char *const header_fmt =
+		"Date: %s, %02d %s %d %02d:%02d:%02d GMT";
+	int header_length = 0;
+	static const char *const days[] = { "Sun", "Mon", "Tue", "Wed", "Thu",
+			"Fri", "Sat"
+	};
+	static const char *const months[] = { "Jan", "Feb", "Mar", "Apr", "May",
+			"Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+	};
+	time_t now = 0;
+	struct tm *tm = NULL;
+	if (NULL == epoch) {
+		now = time(NULL);
+		epoch = &now;
+	}
+	tm = gmtime(epoch);
+
+	header_length = snprintf(NULL, 0, header_fmt, days[tm->tm_wday],
+				 tm->tm_mday, months[tm->tm_mon],
+				 tm->tm_year + 1900, tm->tm_hour, tm->tm_min,
+				 tm->tm_sec);
+	if (0 > header_length) {
+		return NULL;
+	}
+	header = malloc(header_length + 1);
+	if (NULL == header) {
+		return NULL;
+	}
+
+	if (0 > snprintf(header, header_length + 1, header_fmt,
+			 days[tm->tm_wday], tm->tm_mday, months[tm->tm_mon],
+			 tm->tm_year + 1900, tm->tm_hour, tm->tm_min,
+			 tm->tm_sec)) {
+		free(header);
+
+		return NULL;
+	}
+
+	return header;
 }
 
 char *get_content_type(struct Response *response)
@@ -123,14 +166,15 @@ enum unlocked_err https_hmac_GET(struct Request *request,
 	CURLcode status;
 	struct curl_slist *headers = NULL;
 	char *auth_header = NULL;
-	char *date_header = dateHeader();
-	if (NULL == date_header) {
+	time_t epoch = time(NULL);
+	char *header_date = date_header(NULL);
+	if (NULL == header_date) {
 		return UL_MALLOC;
 	}
 	curl = curl_easy_init();
 
-	headers = curl_slist_append(headers, date_header);
-	free(date_header);
+	headers = curl_slist_append(headers, header_date);
+	free(header_date);
 	auth_header = authHeader(headers, request->username, request->secret,
 				 request->body);
 	if (NULL == auth_header) {
@@ -179,14 +223,15 @@ enum unlocked_err https_hmac_PATCH(struct Request *request,
 	CURLcode status;
 	struct curl_slist *headers = NULL;
 	char *auth_header = NULL;
-	char *date_header = dateHeader();
-	if (NULL == date_header) {
+	time_t epoch = time(NULL);
+	char *header_date = date_header(NULL);
+	if (NULL == header_date) {
 		return UL_MALLOC;
 	}
 	curl = curl_easy_init();
 
-	headers = curl_slist_append(headers, date_header);
-	free(date_header);
+	headers = curl_slist_append(headers, header_date);
+	free(header_date);
 	auth_header = authHeader(headers, request->username, request->secret,
 				 request->body);
 	if (NULL == auth_header) {
@@ -240,14 +285,14 @@ enum unlocked_err https_hmac_POST(struct Request *request,
 	CURLcode status;
 	struct curl_slist *headers = NULL;
 	char *auth_header = NULL;
-	char *date_header = dateHeader();
-	if (NULL == date_header) {
+	char *header_date = date_header(NULL);
+	if (NULL == header_date) {
 		return UL_MALLOC;
 	}
 	curl = curl_easy_init();
 
-	headers = curl_slist_append(headers, date_header);
-	free(date_header);
+	headers = curl_slist_append(headers, header_date);
+	free(header_date);
 	auth_header = authHeader(headers, request->username, request->secret,
 				 request->body);
 	if (NULL == auth_header) {
@@ -380,51 +425,6 @@ static char *authHeader(struct curl_slist *headers, const char *username,
 	free(header_names);
 
 	return auth_header;
-}
-
-/**
- * Generates the date header with the current date formatted according to
- * RFC7231.
- *
- * @return char * a pointer to the date header, that MUST be freed after use.
- */
-static char *dateHeader(void)
-{
-	char *header = NULL;
-	static const char *const header_fmt =
-		"Date: %s, %02d %s %d %02d:%02d:%02d GMT";
-	int header_length = 0;
-	static const char *const days[] = { "Mon", "Tue", "Wed", "Thu", "Fri",
-		"Sat", "Sun"
-	};
-	static const char *const months[] = { "Jan", "Feb", "Mar", "Apr", "May",
-		"Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
-	};
-	time_t epoch = time(NULL);
-	struct tm *tm = gmtime(&epoch);
-
-	header_length = snprintf(NULL, 0, header_fmt, days[tm->tm_wday],
-				 tm->tm_mday, months[tm->tm_mon],
-				 tm->tm_year + 1900, tm->tm_hour, tm->tm_min,
-				 tm->tm_sec);
-	if (0 > header_length) {
-		return NULL;
-	}
-	header = malloc(header_length + 1);
-	if (NULL == header) {
-		return NULL;
-	}
-
-	if (0 > snprintf(header, header_length + 1, header_fmt,
-			 days[tm->tm_wday], tm->tm_mday, months[tm->tm_mon],
-			 tm->tm_year + 1900, tm->tm_hour, tm->tm_min,
-			 tm->tm_sec)) {
-		free(header);
-
-		return NULL;
-	}
-
-	return header;
 }
 
 /**

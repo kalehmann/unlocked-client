@@ -23,6 +23,18 @@
 #include "check_https-client.h"
 #include "../src/https-client.h"
 
+START_TEST(test_date_header)
+{
+	time_t now = 1657446089;
+	char *header = date_header(&now);
+	ck_assert_str_eq("Date: Sun, 10 Jul 2022 09:41:29 GMT", header);
+	free(header);
+}
+
+// *INDENT-OFF*
+END_TEST
+// *INDENT-ON*
+
 START_TEST(test_get_content_type_no_header)
 {
 	struct Response *response = create_response();
@@ -92,16 +104,26 @@ START_TEST(test_get_content_type_uppercase)
 END_TEST
 // *INDENT-ON*
 
-static TCase *make_https_client_create_case(void)
+static TCase *make_https_client_date_header_case(void)
 {
-	TCase *tc_https_client;
+	TCase *tc;
 
-	tc_https_client = tcase_create("https-client::get_content_type");
-	tcase_add_test(tc_https_client, test_get_content_type_no_header);
-	tcase_add_test(tc_https_client, test_get_content_type_lowercase);
-	tcase_add_test(tc_https_client, test_get_content_type_uppercase);
+	tc = tcase_create("https-client::date_header");
+	tcase_add_test(tc, test_date_header);
 
-	return tc_https_client;
+	return tc;
+}
+
+static TCase *make_https_client_get_content_type_case(void)
+{
+	TCase *tc;
+
+	tc = tcase_create("https-client::get_content_type");
+	tcase_add_test(tc, test_get_content_type_no_header);
+	tcase_add_test(tc, test_get_content_type_lowercase);
+	tcase_add_test(tc, test_get_content_type_uppercase);
+
+	return tc;
 }
 
 Suite *make_https_client_suite(void)
@@ -109,7 +131,8 @@ Suite *make_https_client_suite(void)
 	Suite *s;
 
 	s = suite_create("unlocked-client https-client");
-	suite_add_tcase(s, make_https_client_create_case());
+	suite_add_tcase(s, make_https_client_date_header_case());
+	suite_add_tcase(s, make_https_client_get_content_type_case());
 
 	return s;
 
