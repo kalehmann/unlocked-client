@@ -67,17 +67,17 @@ void free_response(struct Response *response)
 	free(response);
 }
 
-char *date_header(const time_t *epoch)
+char *date_header(const time_t * epoch)
 {
 	char *header = NULL;
 	static const char *const header_fmt =
 		"Date: %s, %02d %s %d %02d:%02d:%02d GMT";
 	int header_length = 0;
 	static const char *const days[] = { "Sun", "Mon", "Tue", "Wed", "Thu",
-			"Fri", "Sat"
+		"Fri", "Sat"
 	};
 	static const char *const months[] = { "Jan", "Feb", "Mar", "Apr", "May",
-			"Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+		"Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
 	};
 	time_t now = 0;
 	struct tm *tm = NULL;

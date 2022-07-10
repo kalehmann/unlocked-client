@@ -53,7 +53,7 @@ struct Response *create_response(void);
  *
  * @return a pointer to the date header, that MUST be freed after use.
  */
-char *date_header(const time_t *epoch);
+char *date_header(const time_t * epoch);
 
 /**
  *
