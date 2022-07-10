@@ -12,7 +12,7 @@ set -x
 # for further details.
 git config --global --add safe.directory "${GITHUB_WORKSPACE}"
 
-indent $(find "${1}" -name "*.[ch]")
+indent $(find ${1:-.} -name "*.[ch]")
 
 # Check for changes and exit with a non zero code if changes where found
 git diff --exit-code

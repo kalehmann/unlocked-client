@@ -10,7 +10,7 @@ jobs:
                         - name: "Style check"
                           uses: "./.github/actions/beautify"
                           with:
-                                  src: "src"
+                                  src: "src tests"
         unit-tests:
                 runs-on: "ubuntu-latest"
                 name: "C unit tests"
