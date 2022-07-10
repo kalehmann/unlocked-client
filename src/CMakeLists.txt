@@ -1,5 +1,3 @@
-add_subdirectory(mod)
-
 set(LIB_SOURCES
    ${CMAKE_CURRENT_SOURCE_DIR}/cli.c
    ${CMAKE_CURRENT_SOURCE_DIR}/client.c
@@ -7,15 +5,23 @@ set(LIB_SOURCES
    ${CMAKE_CURRENT_SOURCE_DIR}/https-client.c
    ${CMAKE_CURRENT_SOURCE_DIR}/log.c
    ${CMAKE_CURRENT_SOURCE_DIR}/sockets.c
+   ${CMAKE_CURRENT_SOURCE_DIR}/../vendor/cJSON/cJSON.c
 )
 
 set(SOURCES
    ${CMAKE_CURRENT_SOURCE_DIR}/main.c
 )
-target_sources( unlocked-client PRIVATE ${SOURCES} )
+add_executable( unlocked-client ${SOURCES} )
+set_target_properties( unlocked-client PROPERTIES LINKER_LANGUAGE C )
+
 add_library( libunlocked STATIC ${LIB_SOURCES} )
-target_include_directories( libunlocked PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../vendor/cJSON )
+target_include_directories( libunlocked PRIVATE
+  ${CMAKE_CURRENT_SOURCE_DIR}/../vendor/cJSON
+  ${CMAKE_CURRENT_SOURCE_DIR}/../vendor/iniparser/src
+)
+add_subdirectory(mod)
 
 find_package( CURL REQUIRED )
 find_package( OpenSSL REQUIRED )
-target_link_libraries( libunlocked PRIVATE CURL::libcurl OpenSSL::SSL )
+target_link_libraries( libunlocked PRIVATE CURL::libcurl iniparser OpenSSL::SSL )
+target_link_libraries( unlocked-client PRIVATE libunlocked )

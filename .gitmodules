@@ -4,3 +4,6 @@
 [submodule "vendor/libcheck"]
 	path = vendor/libcheck
 	url = git@github.com:libcheck/check.git
+[submodule "vendor/iniparser"]
+	path = vendor/iniparser
+	url = git@github.com:ndevilla/iniparser.git

@@ -3,4 +3,4 @@ set(SOURCES
    ${CMAKE_CURRENT_SOURCE_DIR}/module.c
 )
 
-target_sources( unlocked-client PRIVATE ${SOURCES} )
+target_sources( libunlocked PRIVATE ${SOURCES} )
