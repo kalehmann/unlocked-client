@@ -60,12 +60,12 @@ int main(int argc, char **argv)
 
 	register_module(get_mod_stdout());
 	err = request_key(&arguments);
+	cleanup_modules();
 	if (UL_OK != err) {
 		ul_error(err);
 
 		return EXIT_FAILURE;
 	}
-	cleanup_modules();
 
 	return EXIT_SUCCESS;
 }
