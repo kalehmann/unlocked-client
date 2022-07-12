@@ -59,6 +59,9 @@ START_TEST(test_add_auth_header)
 			 headers->next->data);
 	curl_slist_free_all(headers);
 }
+// *INDENT-OFF*
+END_TEST
+// *INDENT-ON*
 
 START_TEST(test_add_date_header_with_existing_headers)
 {
@@ -76,6 +79,9 @@ START_TEST(test_add_date_header_with_existing_headers)
 	ck_assert_mem_eq("Date: ", headers->next->data, 6);
 	curl_slist_free_all(headers);
 }
+// *INDENT-OFF*
+END_TEST
+// *INDENT-ON*
 
 START_TEST(test_add_date_header_without_existing_headers)
 {
@@ -93,6 +99,9 @@ START_TEST(test_add_date_header_without_existing_headers)
 	ck_assert_mem_eq("Date: ", headers->data, 6);
 	curl_slist_free_all(headers);
 }
+// *INDENT-OFF*
+END_TEST
+// *INDENT-ON*
 
 START_TEST(test_date_header)
 {
@@ -101,7 +110,6 @@ START_TEST(test_date_header)
 	ck_assert_str_eq("Date: Sun, 10 Jul 2022 09:41:29 GMT", header);
 	free(header);
 }
-
 // *INDENT-OFF*
 END_TEST
 // *INDENT-ON*
@@ -122,7 +130,6 @@ START_TEST(test_get_content_type_no_header)
 	ck_assert_ptr_null(content_type);
 	free_response(response);
 }
-
 // *INDENT-OFF*
 END_TEST
 // *INDENT-ON*

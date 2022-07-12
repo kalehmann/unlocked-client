@@ -12,3 +12,5 @@ target_link_libraries( check_unlocked_client PRIVATE check libunlocked Threads::
 target_include_directories( check_unlocked_client PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}/../vendor/libcheck/src/
 )
+
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/mod)

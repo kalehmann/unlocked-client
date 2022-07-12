@@ -17,24 +17,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef UNLOCKED_CHECK_MOD_MODULE_H
+#define UNLOCKED_CHECK_MOD_MODULE_H
+
 #include <check.h>
-#include <stdlib.h>
 
-#include "check_https-client.h"
-#include "mod/check_module.h"
+Suite *make_mod_module_suite(void);
 
-int main(void)
-{
-	int number_failed;
-	SRunner *sr;
-
-	sr = srunner_create(NULL);
-	srunner_add_suite(sr, make_https_client_suite());
-	srunner_add_suite(sr, make_mod_module_suite());
-
-	srunner_run_all(sr, CK_VERBOSE);
-	number_failed = srunner_ntests_failed(sr);
-	srunner_free(sr);
-
-	return (number_failed == 0) ? EXIT_SUCCESS : EXIT_FAILURE;
-}
+#endif
