@@ -176,7 +176,6 @@ struct curl_slist *add_date_header(struct curl_slist *headers)
 	return headers;
 }
 
-
 enum unlocked_err init_https_client(void)
 {
 	CURLcode status;

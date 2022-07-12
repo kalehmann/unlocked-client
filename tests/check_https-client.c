@@ -47,18 +47,18 @@ START_TEST(test_add_auth_header)
 	ck_assert_uint_eq(2, header_count);
 	// Signature is created by running
 	// hmac.new(
-        //   b"1234", b"Date: Sun, 10 Jul 2022 09:41:29 GMT\ntest", "SHA512"
-        // ).hexdigest().upper()
+	//   b"1234", b"Date: Sun, 10 Jul 2022 09:41:29 GMT\ntest", "SHA512"
+	// ).hexdigest().upper()
 	// in python
 	ck_assert_str_eq("Authorization: hmac username=\"myuser\", "
 			 "algorithm=\"sha512\", "
 			 "headers=\"date\", "
 			 "signature=\"0D137829150CFBE26CBCC48E4AE2EFA1C01CA1183"
 			 "6DF65B5C3D6C2A7CF4C67203FD457A144D4E36B96CDE87A765DD6"
-			 "D4C69E2213DB13D93FADF70DE560B6676B\"", headers->next->data);
+			 "D4C69E2213DB13D93FADF70DE560B6676B\"",
+			 headers->next->data);
 	curl_slist_free_all(headers);
 }
-
 
 START_TEST(test_add_date_header_with_existing_headers)
 {
@@ -77,7 +77,6 @@ START_TEST(test_add_date_header_with_existing_headers)
 	curl_slist_free_all(headers);
 }
 
-
 START_TEST(test_add_date_header_without_existing_headers)
 {
 	struct curl_slist *headers = NULL;
@@ -94,7 +93,6 @@ START_TEST(test_add_date_header_without_existing_headers)
 	ck_assert_mem_eq("Date: ", headers->data, 6);
 	curl_slist_free_all(headers);
 }
-
 
 START_TEST(test_date_header)
 {
@@ -187,7 +185,6 @@ static TCase *make_https_client_add_auth_header_case(void)
 	return tc;
 }
 
-
 static TCase *make_https_client_add_date_header_case(void)
 {
 	TCase *tc;
@@ -198,7 +195,6 @@ static TCase *make_https_client_add_date_header_case(void)
 
 	return tc;
 }
-
 
 static TCase *make_https_client_date_header_case(void)
 {

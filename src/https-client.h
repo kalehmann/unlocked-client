@@ -90,7 +90,6 @@ void cleanup_https_client(void);
 struct curl_slist *add_auth_header(struct curl_slist *headers,
 				   struct Request *request);
 
-
 /**
  * @param headers is the list of headers the date header will be appended to.
  *                Passing NULL to create a new list is allowed.
