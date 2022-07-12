@@ -145,6 +145,38 @@ char *get_content_type(struct Response *response)
 	return content_type;
 }
 
+void cleanup_https_client(void)
+{
+	curl_global_cleanup();
+}
+
+struct curl_slist *add_auth_header(struct curl_slist *headers,
+				   struct Request *request)
+{
+	char *header_auth = authHeader(headers, request->username,
+				       request->secret, request->body);
+	if (NULL == header_auth) {
+		return NULL;
+	}
+	headers = curl_slist_append(headers, header_auth);
+	free(header_auth);
+
+	return headers;
+}
+
+struct curl_slist *add_date_header(struct curl_slist *headers)
+{
+	char *header_date = date_header(NULL);
+	if (NULL == header_date) {
+		return NULL;
+	}
+	headers = curl_slist_append(headers, header_date);
+	free(header_date);
+
+	return headers;
+}
+
+
 enum unlocked_err init_https_client(void)
 {
 	CURLcode status;
@@ -165,27 +197,21 @@ enum unlocked_err https_hmac_GET(struct Request *request,
 	CURL *curl;
 	CURLcode status;
 	struct curl_slist *headers = NULL;
-	char *auth_header = NULL;
-	time_t epoch = time(NULL);
-	char *header_date = date_header(NULL);
-	if (NULL == header_date) {
+
+	headers = add_date_header(headers);
+	if (NULL == headers) {
 		return UL_MALLOC;
 	}
-	curl = curl_easy_init();
-
-	headers = curl_slist_append(headers, header_date);
-	free(header_date);
-	auth_header = authHeader(headers, request->username, request->secret,
-				 request->body);
-	if (NULL == auth_header) {
-		curl_slist_free_all(headers);
-
+	headers = add_auth_header(headers, request);
+	if (NULL == headers) {
 		return UL_MALLOC;
 	}
-	headers = curl_slist_append(headers, auth_header);
-	free(auth_header);
 	headers = curl_slist_append(headers, "Accept: application/json");
+	if (NULL == headers) {
+		return UL_MALLOC;
+	}
 
+	curl = curl_easy_init();
 	if (!curl) {
 		curl_slist_free_all(headers);
 
@@ -222,30 +248,27 @@ enum unlocked_err https_hmac_PATCH(struct Request *request,
 	CURL *curl;
 	CURLcode status;
 	struct curl_slist *headers = NULL;
-	char *auth_header = NULL;
-	time_t epoch = time(NULL);
-	char *header_date = date_header(NULL);
-	if (NULL == header_date) {
+
+	headers = add_date_header(headers);
+	if (NULL == headers) {
 		return UL_MALLOC;
 	}
-	curl = curl_easy_init();
-
-	headers = curl_slist_append(headers, header_date);
-	free(header_date);
-	auth_header = authHeader(headers, request->username, request->secret,
-				 request->body);
-	if (NULL == auth_header) {
-		curl_slist_free_all(headers);
-
+	headers = add_auth_header(headers, request);
+	if (NULL == headers) {
 		return UL_MALLOC;
 	}
-	headers = curl_slist_append(headers, auth_header);
-	free(auth_header);
 	headers = curl_slist_append(headers, "Accept: text/plain");
+	if (NULL == headers) {
+		return UL_MALLOC;
+	}
 	headers =
 		curl_slist_append(headers,
 				  "Content-Type: application/json; charsets: utf-8");
+	if (NULL == headers) {
+		return UL_MALLOC;
+	}
 
+	curl = curl_easy_init();
 	if (!curl) {
 		curl_slist_free_all(headers);
 
@@ -284,29 +307,29 @@ enum unlocked_err https_hmac_POST(struct Request *request,
 	CURL *curl;
 	CURLcode status;
 	struct curl_slist *headers = NULL;
-	char *auth_header = NULL;
-	char *header_date = date_header(NULL);
-	if (NULL == header_date) {
+
+	headers = add_date_header(headers);
+	if (NULL == headers) {
 		return UL_MALLOC;
 	}
-	curl = curl_easy_init();
-
-	headers = curl_slist_append(headers, header_date);
-	free(header_date);
-	auth_header = authHeader(headers, request->username, request->secret,
-				 request->body);
-	if (NULL == auth_header) {
+	headers = add_auth_header(headers, request);
+	if (NULL == headers) {
+		return UL_MALLOC;
+	}
+	headers = curl_slist_append(headers, "Accept: application/json");
+	if (NULL == headers) {
+		return UL_MALLOC;
+	}
+	headers =
+		curl_slist_append(headers,
+				  "Content-Type: application/json; charsets: utf-8");
+	if (NULL == headers) {
 		curl_slist_free_all(headers);
 
 		return UL_MALLOC;
 	}
-	headers = curl_slist_append(headers, auth_header);
-	free(auth_header);
-	headers = curl_slist_append(headers, "Accept: application/json");
-	headers =
-		curl_slist_append(headers,
-				  "Content-Type: application/json; charsets: utf-8");
 
+	curl = curl_easy_init();
 	if (!curl) {
 		curl_slist_free_all(headers);
 
@@ -336,11 +359,6 @@ enum unlocked_err https_hmac_POST(struct Request *request,
 	}
 
 	return UL_OK;
-}
-
-void cleanup_https_client(void)
-{
-	curl_global_cleanup();
 }
 
 /**
@@ -492,6 +510,15 @@ static char *joinHeaderNames(struct curl_slist *header_list)
 	char *headers = NULL;
 	size_t headers_size = 1;
 	int offset = 0;
+	if (NULL == header_list) {
+		headers = malloc(1);
+		if (NULL == headers) {
+			return NULL;
+		}
+		headers[0] = '\0';
+
+		return headers;
+	}
 
 	while (header_iterator) {
 		separator = strstr(header_iterator->data, ":");

@@ -72,6 +72,35 @@ void free_response(struct Response *response);
 char *get_content_type(struct Response *response);
 
 /**
+ * Cleanup after the http client.
+ */
+void cleanup_https_client(void);
+
+/**
+ * @param headers is the list of headers the Authorization header will be
+ *                appended to.
+ *                All headers in this list will be included in the Authorization
+ *                header, passing NULL to create a new list is nevertheless
+ *                allowed.
+ * @param request is the request to create the auth header for.
+ *
+ * @return the list of headers with the appended auth header or NULL if any
+ *         error occured.
+ */
+struct curl_slist *add_auth_header(struct curl_slist *headers,
+				   struct Request *request);
+
+
+/**
+ * @param headers is the list of headers the date header will be appended to.
+ *                Passing NULL to create a new list is allowed.
+ *
+ * @return the list of headers with the appended auth header or NULL if any
+ *         error occured.
+ */
+struct curl_slist *add_date_header(struct curl_slist *headers);
+
+/**
  * Initializes the http client.
  *
  * @return a status code indicating any error that occured.
@@ -95,10 +124,5 @@ enum unlocked_err https_hmac_PATCH(struct Request *request,
  */
 enum unlocked_err https_hmac_POST(struct Request *request,
 				  struct Response *response);
-
-/**
- * Cleanup after the http client.
- */
-void cleanup_https_client(void);
 
 #endif
