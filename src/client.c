@@ -63,6 +63,26 @@ enum unlocked_err request_key(struct arguments *arguments)
 	request.body = NULL;
 	free(request.url);
 	request.url = NULL;
+	switch (response->status) {
+	case 201:
+		// Expected response status, continue
+		break;
+	case 401:
+		// Authentication failed
+		logger(LOG_ERROR,
+		       "Authentication against the server failed. "
+		       "Maybe the user or secret are incorrect?\n");
+		free_response(response);
+
+		return UL_ERR;
+	default:
+		logger(LOG_ERROR,
+		       "Communication with the server failed with code %ld.\n",
+		       response->status);
+		free_response(response);
+
+		return UL_ERR;
+	}
 	validate_content_type(response);
 	request_id = get_request_id(response);
 	free_response(response);
