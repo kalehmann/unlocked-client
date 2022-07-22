@@ -32,7 +32,7 @@ int main(int argc, char **argv)
 {
 	enum unlocked_err err = UL_OK;
 	struct arguments arguments = {
-		.no_validation = 0,
+		.validate = VALIDATE,
 		.port = 443,
 	};
 

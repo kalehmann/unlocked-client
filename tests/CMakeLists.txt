@@ -2,6 +2,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../src)
 
 set(TEST_SOURCES
   ${CMAKE_CURRENT_SOURCE_DIR}/check_unlocked_client.c
+  ${CMAKE_CURRENT_SOURCE_DIR}/check_cli.c
   ${CMAKE_CURRENT_SOURCE_DIR}/check_https-client.c
 )
 

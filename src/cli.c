@@ -98,7 +98,7 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state)
 		arguments->username = arg;
 		break;
 	case OPT_SKIP_VALIDATION:
-		arguments->no_validation = 1;
+		arguments->validate = SKIP_VALIDATION;
 		break;
 	case ARGP_KEY_ARG:
 		if (state->arg_num >= 1) {
@@ -136,4 +136,29 @@ static struct argp argp_client = {
 void handle_args(int argc, char **argv, struct arguments *args)
 {
 	argp_parse(&argp_client, argc, argv, 0, 0, args);
+}
+
+void merge_config(struct arguments *base, struct arguments *new)
+{
+	if (new->config_file) {
+		base->config_file = new->config_file;
+	}
+	if (new->key_handle) {
+		base->key_handle = new->key_handle;
+	}
+	if (new->host) {
+		base->host = new->host;
+	}
+	if (new->port) {
+		base->port = new->port;
+	}
+	if (new->secret) {
+		base->secret = new->secret;
+	}
+	if (new->username) {
+		base->username = new->username;
+	}
+	if (new->validate) {
+		base->validate = new->validate;
+	}
 }

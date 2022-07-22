@@ -20,6 +20,9 @@
 #ifndef UNLOCKED_CLI_H
 #define UNLOCKED_CLI_H
 
+#define SKIP_VALIDATION 1
+#define VALIDATE -1
+
 #include <argp.h>
 
 struct arguments {
@@ -28,9 +31,15 @@ struct arguments {
 	long port;
 	char *secret;
 	char *username;
-	int no_validation;
+	int validate;
 };
 
 void handle_args(int argc, char **argv, struct arguments *args);
+
+/**
+ *
+ */
+void merge_config(struct arguments *base, struct arguments *new);
+
 
 #endif

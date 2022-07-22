@@ -236,5 +236,4 @@ Suite *make_https_client_suite(void)
 	suite_add_tcase(s, make_https_client_get_content_type_case());
 
 	return s;
-
 }
