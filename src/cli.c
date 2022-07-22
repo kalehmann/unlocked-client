@@ -18,8 +18,12 @@
  */
 
 #include <stdlib.h>
-#include "cli.h"
+#include <iniparser.h>
 
+#include "cli.h"
+#include "log.h"
+
+#define OPT_CONFIG 'c'
 #define	OPT_HOST 'h'
 #define	OPT_PORT 'p'
 #define OPT_SECRET 's'
@@ -32,6 +36,13 @@ static char args_doc[] = "KEY_HANDLE";
 
 // *INDENT-OFF*
 static struct argp_option options[] = {
+        {
+		.name = "config",
+		.key = OPT_CONFIG,
+		.arg = "<path>",
+		.flags = 0,
+		.doc = "Path to the configuration file",
+	},
 	{
 		.name = "host",
 		.key = OPT_HOST,
@@ -85,6 +96,9 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state)
 	struct arguments *arguments = state->input;
 
 	switch (key) {
+	case OPT_CONFIG:
+		arguments->config_file = arg;
+		break;
 	case OPT_HOST:
 		arguments->host = arg;
 		break;

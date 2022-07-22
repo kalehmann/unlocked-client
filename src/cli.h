@@ -25,7 +25,10 @@
 
 #include <argp.h>
 
+#include "error.h"
+
 struct arguments {
+	char *config_file;
 	char *key_handle;
 	char *host;
 	long port;
