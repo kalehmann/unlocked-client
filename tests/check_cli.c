@@ -279,7 +279,6 @@ START_TEST(test_validation_is_merged)
 END_TEST
 // *INDENT-ON*
 
-
 static TCase *make_cli_merge_config_case(void)
 {
 	TCase *tc;
