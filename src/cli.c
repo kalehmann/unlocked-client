@@ -18,6 +18,7 @@
  */
 
 #include <stdlib.h>
+#include <string.h>
 #include <iniparser.h>
 
 #include "cli.h"
@@ -25,14 +26,13 @@
 
 #define OPT_CONFIG 'c'
 #define	OPT_HOST 'h'
+#define	OPT_KEY 'k'
 #define	OPT_PORT 'p'
 #define OPT_SECRET 's'
 #define OPT_USER 'u'
 #define OPT_SKIP_VALIDATION 256
 
 static char doc[] = "unlocked-client -- a tool to fetch keys from a server";
-
-static char args_doc[] = "KEY_HANDLE";
 
 // *INDENT-OFF*
 static struct argp_option options[] = {
@@ -49,6 +49,13 @@ static struct argp_option options[] = {
 		.arg = "<hostname>",
 		.flags = 0,
 		.doc = "Hostname of the server",
+	},
+	{
+		.name = "key",
+		.key = OPT_KEY,
+		.arg = "<key handle>",
+		.flags = 0,
+		.doc = "Handle of the key to request",
 	},
 	{
 		.name = "port",
@@ -102,6 +109,9 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state)
 	case OPT_HOST:
 		arguments->host = arg;
 		break;
+	case OPT_KEY:
+		arguments->key_handle = arg;
+		break;
 	case OPT_PORT:
 		arguments->port = atol(arg);
 		break;
@@ -115,18 +125,8 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state)
 		arguments->validate = SKIP_VALIDATION;
 		break;
 	case ARGP_KEY_ARG:
-		if (state->arg_num >= 1) {
-			argp_usage(state);
-		}
+		argp_usage(state);
 
-		arguments->key_handle = arg;
-
-		break;
-
-	case ARGP_KEY_END:
-		if (state->arg_num < 1) {
-			argp_usage(state);
-		}
 		break;
 	default:
 		return ARGP_ERR_UNKNOWN;
@@ -139,7 +139,7 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state)
 static struct argp argp_client = {
 	.options = options,
 	.parser = parse_opt,
-	.args_doc = args_doc,
+	.args_doc = NULL,
 	.doc = doc,
 	.children = NULL,
 	.help_filter = NULL,
@@ -147,9 +147,25 @@ static struct argp argp_client = {
 };
 // *INDENT-ON*
 
-void handle_args(int argc, char **argv, struct arguments *args)
+enum unlocked_err handle_args(int argc, char **argv, struct arguments *args)
 {
-	argp_parse(&argp_client, argc, argv, 0, 0, args);
+	struct arguments cli_args = { 0 };
+	struct arguments config_args = { 0 };
+	enum unlocked_err err = UL_OK;
+
+	argp_parse(&argp_client, argc, argv, 0, 0, &cli_args);
+
+	if (cli_args.config_file) {
+		err = parse_config_file(cli_args.config_file, &config_args);
+		if (UL_OK != err) {
+			return err;
+		}
+	}
+
+	merge_config(args, &config_args);
+	merge_config(args, &cli_args);
+
+	return UL_OK;
 }
 
 void merge_config(struct arguments *base, struct arguments *new)
@@ -175,4 +191,75 @@ void merge_config(struct arguments *base, struct arguments *new)
 	if (new->validate) {
 		base->validate = new->validate;
 	}
+}
+
+enum unlocked_err parse_config_file(const char *const path,
+				    struct arguments *args)
+{
+	dictionary *ini = NULL;
+	const char *host = NULL;
+	const char *key_handle = NULL;
+	const char *secret = NULL;
+	const char *username = NULL;
+	int validate = 0;
+
+	ini = iniparser_load(path);
+	if (NULL == ini) {
+		logger(LOG_ERROR,
+		       "Could not parse configuration file %s", path);
+
+		return UL_ERR;
+	}
+	host = iniparser_getstring(ini, "unlocked:host", NULL);
+	if (NULL != host) {
+		args->host = strdup(host);
+		if (NULL == args->host) {
+			iniparser_freedict(ini);
+
+			return UL_MALLOC;
+		}
+	}
+	key_handle = iniparser_getstring(ini, "unlocked:key_handle", NULL);
+	if (NULL != key_handle) {
+		args->key_handle = strdup(key_handle);
+		if (NULL == args->key_handle) {
+			iniparser_freedict(ini);
+
+			return UL_MALLOC;
+		}
+	}
+	args->port = iniparser_getlongint(ini, "unlocked:port", 0);
+	secret = iniparser_getstring(ini, "unlocked:secret", NULL);
+	if (NULL != secret) {
+		args->secret = strdup(secret);
+		if (NULL == args->secret) {
+			iniparser_freedict(ini);
+
+			return UL_MALLOC;
+		}
+	}
+	username = iniparser_getstring(ini, "unlocked:username", NULL);
+	if (NULL != username) {
+		args->username = strdup(username);
+		if (NULL == args->username) {
+			iniparser_freedict(ini);
+
+			return UL_MALLOC;
+		}
+	}
+	validate = iniparser_getboolean(ini, "unlocked:validate", -1);
+	switch (validate) {
+	case 1:
+		args->validate = VALIDATE;
+		break;
+	case 0:
+		args->validate = SKIP_VALIDATION;
+		break;
+	default:
+		args->validate = 0;
+	}
+
+	iniparser_freedict(ini);
+
+	return UL_OK;
 }

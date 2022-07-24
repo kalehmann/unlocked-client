@@ -37,12 +37,48 @@ struct arguments {
 	int validate;
 };
 
-void handle_args(int argc, char **argv, struct arguments *args);
+/**
+ * Aquire all the configuration for the unlocked client.
+ *
+ * The following sources are used in this order:
+ * - Default values
+ * - Configuration files
+ * - Commandline arguments
+ *
+ * Values from later sources override the values from former ones.
+ *
+ * @param argc is the number of command line arguments
+ * @param argv is the vector with the command line arguments
+ * @param args is the structure that will be filled with the parsed values.
+ *             If the structure is already prepopulated with any values, these
+ *             will be kept if no new value is provided on the command line or
+ *             in a config file.
+ *
+ * @return any error that occured
+ */
+enum unlocked_err handle_args(int argc, char **argv, struct arguments *args);
 
 /**
+ * Merge to structures with arguments to the unlocked client.
+ * Unset values will not be transfered from the new to the base
+ * arguments.
  *
+ * @param base is the structure of arguments which may be overriden.
+ * @param new is the structure of arguments which are used to override the
+ *            base values.
  */
 void merge_config(struct arguments *base, struct arguments *new);
 
+/**
+ * Parse values from a configuration file.
+ *
+ * @param path is the path to the configuration file.
+ * @param args is the structure that will be populated with the arguments from
+ *             the configuration file.
+ *
+ * @return any error that occured while parsing the config file.
+ */
+enum unlocked_err parse_config_file(const char *const path,
+				    struct arguments *args);
 
 #endif
