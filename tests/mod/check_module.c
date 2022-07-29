@@ -23,14 +23,16 @@
 static int failure_called = 0;
 static const char *success_key = NULL;
 
-static enum unlocked_err test_mod_success(const char *const key)
+static enum unlocked_err test_mod_success(struct unlocked_module *module,
+					  const char *const key)
 {
 	success_key = key;
 
 	return UL_OK;
 }
 
-static enum unlocked_err test_mod_failure(enum unlocked_err err)
+static enum unlocked_err test_mod_failure(struct unlocked_module *module,
+					  enum unlocked_err err)
 {
 	failure_called++;
 

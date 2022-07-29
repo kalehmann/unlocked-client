@@ -23,8 +23,7 @@
 #define SKIP_VALIDATION 1
 #define VALIDATE -1
 
-#include <argp.h>
-
+#include "mod/module.h"
 #include "error.h"
 
 struct arguments {
@@ -80,5 +79,18 @@ void merge_config(struct arguments *base, struct arguments *new);
  */
 enum unlocked_err parse_config_file(const char *const path,
 				    struct arguments *args);
+
+/**
+ * @param module is the module of which a child parser will be registered if
+ *               available.
+ *
+ * @return any error that occured
+ */
+enum unlocked_err register_child_parser(const struct unlocked_module *module);
+
+/**
+ * Free all resources allocated for the child parsers.
+ */
+void free_child_parsers(void);
 
 #endif

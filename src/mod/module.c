@@ -17,6 +17,7 @@
 
 #include <stdlib.h>
 #include "module.h"
+#include "../cli.h"
 
 static struct unlocked_module **modules = NULL;
 
@@ -45,7 +46,7 @@ enum unlocked_err handle_failure(enum unlocked_err provided_err)
 
 	for (unsigned int i = 0; i < module_count; i++) {
 		if (NULL != modules[i]->failure) {
-			err = modules[i]->failure(provided_err);
+			err = modules[i]->failure(modules[i], provided_err);
 			if (UL_OK != err) {
 				return err;
 			}
@@ -61,7 +62,7 @@ enum unlocked_err handle_success(const char *const key)
 
 	for (unsigned int i = 0; i < module_count; i++) {
 		if (NULL != modules[i]->success) {
-			err = modules[i]->success(key);
+			err = modules[i]->success(modules[i], key);
 			if (UL_OK != err) {
 				return err;
 			}
@@ -73,14 +74,15 @@ enum unlocked_err handle_success(const char *const key)
 
 enum unlocked_err register_module(struct unlocked_module *module)
 {
-	modules = realloc(modules,
-			  sizeof(struct unlocked_module *) * (module_count +
-							      1));
+	static const size_t mod_size = sizeof(struct unlocked_module *);
+
+	modules = realloc(modules, mod_size * (module_count + 1));
 	if (NULL == modules) {
 		return UL_MALLOC;
 	}
 	modules[module_count] = module;
 	module_count++;
+	register_child_parser(module);
 
 	return UL_OK;
 }

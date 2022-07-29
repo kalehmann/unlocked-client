@@ -19,12 +19,18 @@
 #ifndef UNLOCKED_MOD_MODULE_H
 #define UNLOCKED_MOD_MODULE_H
 
+#include <argp.h>
+
 #include "../error.h"
 
 struct unlocked_module {
+	struct argp *argp;
+	void *state;
 	enum unlocked_err (*init) (struct unlocked_module *);
-	enum unlocked_err (*success) (const char *const);
-	enum unlocked_err (*failure) (enum unlocked_err);
+	enum unlocked_err (*success) (struct unlocked_module *,
+				      const char *const);
+	enum unlocked_err (*failure) (struct unlocked_module *,
+				      enum unlocked_err);
 	enum unlocked_err (*cleanup) (struct unlocked_module *);
 };
 

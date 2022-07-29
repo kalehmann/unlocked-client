@@ -36,6 +36,7 @@ int main(int argc, char **argv)
 		.port = 443,
 	};
 
+	register_module(get_mod_stdout());
 	handle_args(argc, argv, &arguments);
 	if (NULL == arguments.host) {
 		fprintf(stderr, "No hostname given\n");
@@ -58,8 +59,8 @@ int main(int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 
-	register_module(get_mod_stdout());
 	err = request_key(&arguments);
+	free_child_parsers();
 	cleanup_modules();
 	if (UL_OK != err) {
 		ul_error(err);

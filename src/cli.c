@@ -34,6 +34,10 @@
 
 static char doc[] = "unlocked-client -- a tool to fetch keys from a server";
 
+static size_t sub_parser_count = 0;
+static struct argp_child *sub_parsers = NULL;
+static void **sub_parser_inputs = NULL;
+
 // *INDENT-OFF*
 static struct argp_option options[] = {
         {
@@ -128,6 +132,13 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state)
 		argp_usage(state);
 
 		break;
+	case ARGP_KEY_INIT:
+		for (size_t i = 0; i < sub_parser_count; i++) {
+			state->child_inputs[i] = sub_parser_inputs[i];
+		}
+		break;
+	case ARGP_KEY_FINI:
+		break;
 	default:
 		return ARGP_ERR_UNKNOWN;
 	}
@@ -135,24 +146,22 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state)
 	return 0;
 }
 
-// *INDENT-OFF*
-static struct argp argp_client = {
-	.options = options,
-	.parser = parse_opt,
-	.args_doc = NULL,
-	.doc = doc,
-	.children = NULL,
-	.help_filter = NULL,
-	.argp_domain = NULL,
-};
-// *INDENT-ON*
-
 enum unlocked_err handle_args(int argc, char **argv, struct arguments *args)
 {
 	struct arguments cli_args = { 0 };
 	struct arguments config_args = { 0 };
 	enum unlocked_err err = UL_OK;
-
+        // *INDENT-OFF*
+	struct argp argp_client = {
+		.options = options,
+		.parser = parse_opt,
+		.args_doc = NULL,
+		.doc = doc,
+		.children = sub_parsers,
+		.help_filter = NULL,
+		.argp_domain = NULL,
+	};
+        // *INDENT-ON*
 	argp_parse(&argp_client, argc, argv, 0, 0, &cli_args);
 
 	if (cli_args.config_file) {
@@ -262,4 +271,44 @@ enum unlocked_err parse_config_file(const char *const path,
 	iniparser_freedict(ini);
 
 	return UL_OK;
+}
+
+enum unlocked_err register_child_parser(const struct unlocked_module *module)
+{
+	static const size_t child_size = sizeof(struct argp_child);
+
+	if (NULL == module->argp) {
+		return UL_OK;
+	}
+
+	sub_parsers = realloc(sub_parsers, child_size * (sub_parser_count + 2));
+	if (NULL == sub_parsers) {
+		return UL_MALLOC;
+	}
+	sub_parser_inputs = realloc(sub_parser_inputs,
+				    sizeof(void *) * (sub_parser_count + 1));
+	if (NULL == sub_parser_inputs) {
+		return UL_MALLOC;
+	}
+
+	sub_parsers[sub_parser_count].argp = module->argp;
+	sub_parsers[sub_parser_count].flags = 0;
+	sub_parsers[sub_parser_count].header = NULL;
+	sub_parsers[sub_parser_count].group = 0;
+
+	sub_parsers[sub_parser_count + 1].argp = NULL;
+	sub_parsers[sub_parser_count + 1].flags = 0;
+	sub_parsers[sub_parser_count + 1].header = NULL;
+	sub_parsers[sub_parser_count + 1].group = 0;
+
+	sub_parser_inputs[sub_parser_count] = module->state;
+
+	sub_parser_count++;
+}
+
+void free_child_parsers(void)
+{
+	free(sub_parsers);
+	free(sub_parser_inputs);
+	sub_parser_count = 0;
 }
