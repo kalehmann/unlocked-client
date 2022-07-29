@@ -19,20 +19,70 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <argp.h>
+
 #include "module.h"
 #include "mod_stdout.h"
 #include "../error.h"
 
+#define OPT_STDOUT 300
+
+struct stdout_state {
+	int use_stdout;
+};
+
+// *INDENT-OFF*
+static struct argp_option options[] = {
+        {
+		.name = "stdout",
+		.key = OPT_STDOUT,
+		.arg = 0,
+		.flags = 0,
+		.doc = "Output the key on the standard output",
+	},
+	{ 0 }
+};
+// *INDENT-ON*
+
+static error_t stdout_parser(int key, char *arg, struct argp_state *state)
+{
+	struct stdout_state *input = state->input;
+
+	switch (key) {
+	case OPT_STDOUT:
+		input->use_stdout = 1;
+		break;
+	default:
+		return ARGP_ERR_UNKNOWN;
+	}
+
+	return 0;
+}
+
 static enum unlocked_err cleanup(struct unlocked_module *module)
 {
+	if (NULL == module) {
+		return UL_OK;
+	}
+	if (NULL != module->argp) {
+		free(module->argp);
+	}
+	if (NULL != module->state) {
+		free(module->state);
+	}
 	free(module);
 
 	return UL_OK;
 }
 
-static enum unlocked_err success(const char *const key)
+static enum unlocked_err success(struct unlocked_module *module,
+				 const char *const key)
 {
 	size_t key_len = strlen(key);
+	struct stdout_state *state = module->state;
+	if (!state->use_stdout) {
+		return UL_OK;
+	}
 	if (key_len != fwrite(key, sizeof(char), key_len, stdout)) {
 		return UL_ERR;
 	}
@@ -43,10 +93,48 @@ static enum unlocked_err success(const char *const key)
 	return UL_OK;
 }
 
+static struct argp *init_argp(void)
+{
+	struct argp *argp = malloc(sizeof(struct argp));
+	if (NULL == argp) {
+		return NULL;
+	}
+	argp->options = options;
+	argp->parser = stdout_parser;
+	argp->args_doc = NULL;
+	argp->doc = NULL;
+	argp->children = NULL;
+	argp->help_filter = NULL;
+	argp->argp_domain = NULL;
+
+	return argp;
+}
+
+static struct stdout_state *init_state(void)
+{
+	struct stdout_state *state = malloc(sizeof(struct stdout_state));
+	if (NULL == state) {
+		return NULL;
+	}
+	state->use_stdout = 0;
+
+	return state;
+}
+
 struct unlocked_module *get_mod_stdout(void)
 {
 	struct unlocked_module *module = malloc(sizeof(struct unlocked_module));
 	if (NULL == module) {
+		return NULL;
+	}
+	module->argp = init_argp();
+	if (NULL == module->argp) {
+		return NULL;
+	}
+	module->state = init_state();
+	if (NULL == module->state) {
+		free(module->argp);
+
 		return NULL;
 	}
 	module->init = NULL;
