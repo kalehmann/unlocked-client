@@ -13,6 +13,9 @@ set(SOURCES
 )
 add_executable( unlocked-client ${SOURCES} )
 set_target_properties( unlocked-client PROPERTIES LINKER_LANGUAGE C )
+target_include_directories( unlocked-client PRIVATE
+  ${CMAKE_CURRENT_SOURCE_DIR}/../vendor/iniparser/src
+)
 
 add_library( libunlocked STATIC ${LIB_SOURCES} )
 target_include_directories( libunlocked PRIVATE

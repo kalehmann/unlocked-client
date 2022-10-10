@@ -31,35 +31,56 @@ const char *argp_program_bug_address = "<mail@kalehmann.de>";
 int main(int argc, char **argv)
 {
 	enum unlocked_err err = UL_OK;
-	struct arguments arguments = {
-		.validate = VALIDATE,
-		.port = 443,
-	};
+	struct arguments *arguments = create_args();
+	if (NULL == arguments) {
+		return EXIT_FAILURE;
+	}
+	arguments->port = 443;
+	arguments->validate = VALIDATE;
 
 	register_module(get_mod_stdout());
-	handle_args(argc, argv, &arguments);
-	if (NULL == arguments.host) {
+	handle_args(argc, argv, arguments);
+	if (NULL == arguments->host) {
+		free_args(arguments);
+		free_child_parsers();
+		cleanup_modules();
 		fprintf(stderr, "No hostname given\n");
 
 		return EXIT_FAILURE;
 	}
-	if (0 == arguments.port) {
+	if (0 == arguments->port) {
+		free_args(arguments);
 		fprintf(stderr, "Invalid port given\n");
 
 		return EXIT_FAILURE;
 	}
-	if (NULL == arguments.secret) {
+	if (NULL == arguments->key_handle) {
+		free_args(arguments);
+		free_child_parsers();
+		cleanup_modules();
+		fprintf(stderr, "No key handle given\n");
+
+		return EXIT_FAILURE;
+	}
+	if (NULL == arguments->secret) {
+		free_args(arguments);
+		free_child_parsers();
+		cleanup_modules();
 		fprintf(stderr, "No secret given\n");
 
 		return EXIT_FAILURE;
 	}
-	if (NULL == arguments.username) {
+	if (NULL == arguments->username) {
+		free_args(arguments);
+		free_child_parsers();
+		cleanup_modules();
 		fprintf(stderr, "No username given\n");
 
 		return EXIT_FAILURE;
 	}
 
-	err = request_key(&arguments);
+	err = request_key(arguments);
+	free_args(arguments);
 	free_child_parsers();
 	cleanup_modules();
 	if (UL_OK != err) {

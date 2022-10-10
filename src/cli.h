@@ -37,6 +37,13 @@ struct arguments {
 };
 
 /**
+ * Create a new structure to hold arguments supplied to the application.
+ *
+ * @return the allocated argument structure or NULL on failure.
+ */
+struct arguments *create_args(void);
+
+/**
  * Aquire all the configuration for the unlocked client.
  *
  * The following sources are used in this order:
@@ -87,6 +94,11 @@ enum unlocked_err parse_config_file(const char *const path,
  * @return any error that occured
  */
 enum unlocked_err register_child_parser(const struct unlocked_module *module);
+
+/**
+ * Free all resources related to the arguments structure.
+ */
+void free_args(struct arguments *args);
 
 /**
  * Free all resources allocated for the child parsers.

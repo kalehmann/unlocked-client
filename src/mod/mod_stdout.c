@@ -93,6 +93,24 @@ static enum unlocked_err success(struct unlocked_module *module,
 	return UL_OK;
 }
 
+static enum unlocked_err parse_stdout_config(struct unlocked_module *module,
+					     const dictionary * ini)
+{
+	struct stdout_state *state = module->state;
+	int use = iniparser_getboolean(ini, "stdout:use_stdout", -1);
+
+	switch (use) {
+	case 1:
+		state->use_stdout = 1;
+		break;
+	case 0:
+		state->use_stdout = 0;
+		break;
+	}
+
+	return UL_OK;
+}
+
 static struct argp *init_argp(void)
 {
 	struct argp *argp = malloc(sizeof(struct argp));
@@ -138,6 +156,7 @@ struct unlocked_module *get_mod_stdout(void)
 		return NULL;
 	}
 	module->init = NULL;
+	module->parse_config = &parse_stdout_config;
 	module->success = &success;
 	module->failure = NULL;
 	module->cleanup = &cleanup;

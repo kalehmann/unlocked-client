@@ -20,12 +20,15 @@
 #define UNLOCKED_MOD_MODULE_H
 
 #include <argp.h>
+#include <iniparser.h>
 
 #include "../error.h"
 
 struct unlocked_module {
 	struct argp *argp;
 	void *state;
+	enum unlocked_err (*parse_config) (struct unlocked_module *,
+					   const dictionary *);
 	enum unlocked_err (*init) (struct unlocked_module *);
 	enum unlocked_err (*success) (struct unlocked_module *,
 				      const char *const);
@@ -58,6 +61,15 @@ enum unlocked_err handle_failure(enum unlocked_err err);
  * @return any error from the modules
  */
 enum unlocked_err handle_success(const char *const key);
+
+/**
+ * Let all the registered modules parse the config file.
+ *
+ * @param ini is the dictionary of the loaded config file.
+ *
+ * @return any error from the modules.
+ */
+enum unlocked_err parse_config(const dictionary * ini);
 
 /**
  * Registers a new module for the application.

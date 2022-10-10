@@ -24,14 +24,15 @@ START_TEST(test_config_file_is_not_merged_when_empty)
 {
 	static char *base_config = "test";
 
-	struct arguments base = {
-		.config_file = base_config,
-	};
-	struct arguments cli = { 0 };
+	struct arguments *base = create_args();
+	struct arguments *cli = create_args();
 
-	merge_config(&base, &cli);
+	base->config_file = strdup(base_config);
+	merge_config(base, cli);
+	ck_assert_str_eq(base_config, base->config_file);
 
-	ck_assert_ptr_eq(base_config, base.config_file);
+	free_args(base);
+	free_args(cli);
 }
 // *INDENT-OFF*
 END_TEST
@@ -42,16 +43,16 @@ START_TEST(test_config_file_is_merged)
 	static char *base_config = "test";
 	static char *cli_config = "new";
 
-	struct arguments base = {
-		.config_file = base_config,
-	};
-	struct arguments cli = {
-		.config_file = cli_config,
-	};
+	struct arguments *base = create_args();
+	struct arguments *cli = create_args();
 
-	merge_config(&base, &cli);
+	base->config_file = strdup(base_config);
+	cli->config_file = strdup(cli_config);
+	merge_config(base, cli);
+	ck_assert_str_eq(cli_config, base->config_file);
 
-	ck_assert_ptr_eq(cli_config, base.config_file);
+	free_args(base);
+	free_args(cli);
 }
 // *INDENT-OFF*
 END_TEST
@@ -60,15 +61,15 @@ END_TEST
 START_TEST(test_key_handle_is_not_merged_when_empty)
 {
 	static char *base_handle = "test";
+	struct arguments *base = create_args();
+	struct arguments *cli = create_args();
 
-	struct arguments base = {
-		.key_handle = base_handle,
-	};
-	struct arguments cli = { 0 };
+	base->key_handle = strdup(base_handle);
+	merge_config(base, cli);
+	ck_assert_str_eq(base_handle, base->key_handle);
 
-	merge_config(&base, &cli);
-
-	ck_assert_ptr_eq(base_handle, base.key_handle);
+	free_args(base);
+	free_args(cli);
 }
 // *INDENT-OFF*
 END_TEST
@@ -78,17 +79,16 @@ START_TEST(test_key_handle_is_merged)
 {
 	static char *base_handle = "test";
 	static char *cli_handle = "new";
+	struct arguments *base = create_args();
+	struct arguments *cli = create_args();
 
-	struct arguments base = {
-		.key_handle = base_handle,
-	};
-	struct arguments cli = {
-		.key_handle = cli_handle,
-	};
+	base->key_handle = strdup(base_handle);
+	cli->key_handle = strdup(cli_handle);
+	merge_config(base, cli);
+	ck_assert_str_eq(cli_handle, base->key_handle);
 
-	merge_config(&base, &cli);
-
-	ck_assert_ptr_eq(cli_handle, base.key_handle);
+	free_args(base);
+	free_args(cli);
 }
 // *INDENT-OFF*
 END_TEST
@@ -97,15 +97,15 @@ END_TEST
 START_TEST(test_host_is_not_merged_when_empty)
 {
 	static char *base_host = "test";
+	struct arguments *base = create_args();
+	struct arguments *cli = create_args();
 
-	struct arguments base = {
-		.host = base_host,
-	};
-	struct arguments cli = { 0 };
+	base->host = strdup(base_host);
+	merge_config(base, cli);
+	ck_assert_str_eq(base_host, base->host);
 
-	merge_config(&base, &cli);
-
-	ck_assert_ptr_eq(base_host, base.host);
+	free_args(base);
+	free_args(cli);
 }
 // *INDENT-OFF*
 END_TEST
@@ -115,17 +115,16 @@ START_TEST(test_host_is_merged)
 {
 	static char *base_host = "test";
 	static char *cli_host = "new";
+	struct arguments *base = create_args();
+	struct arguments *cli = create_args();
 
-	struct arguments base = {
-		.host = base_host,
-	};
-	struct arguments cli = {
-		.host = cli_host,
-	};
+	base->host = strdup(base_host);
+	cli->host = strdup(cli_host);
+	merge_config(base, cli);
+	ck_assert_str_eq(cli_host, base->host);
 
-	merge_config(&base, &cli);
-
-	ck_assert_ptr_eq(cli_host, base.host);
+	free_args(base);
+	free_args(cli);
 }
 // *INDENT-OFF*
 END_TEST
@@ -134,15 +133,15 @@ END_TEST
 START_TEST(test_port_is_not_merged_when_empty)
 {
 	static long base_port = 443;
+	struct arguments *base = create_args();
+	struct arguments *cli = create_args();
 
-	struct arguments base = {
-		.port = base_port,
-	};
-	struct arguments cli = { 0 };
+	base->port = base_port;
+	merge_config(base, cli);
+	ck_assert_int_eq(base_port, base->port);
 
-	merge_config(&base, &cli);
-
-	ck_assert_int_eq(base_port, base.port);
+	free_args(base);
+	free_args(cli);
 }
 // *INDENT-OFF*
 END_TEST
@@ -150,19 +149,18 @@ END_TEST
 
 START_TEST(test_port_is_merged)
 {
+	struct arguments *base = create_args();
+	struct arguments *cli = create_args();
 	static long base_port = 443;
 	static long cli_port = 8443;
 
-	struct arguments base = {
-		.port = base_port,
-	};
-	struct arguments cli = {
-		.port = cli_port,
-	};
+	base->port = base_port;
+	cli->port = cli_port;
+	merge_config(base, cli);
+	ck_assert_int_eq(cli_port, base->port);
 
-	merge_config(&base, &cli);
-
-	ck_assert_int_eq(cli_port, base.port);
+	free_args(base);
+	free_args(cli);
 }
 // *INDENT-OFF*
 END_TEST
@@ -170,16 +168,16 @@ END_TEST
 
 START_TEST(test_secret_is_not_merged_when_empty)
 {
+	struct arguments *base = create_args();
+	struct arguments *cli = create_args();
 	static char *base_secret = "test";
 
-	struct arguments base = {
-		.secret = base_secret,
-	};
-	struct arguments cli = { 0 };
+	base->secret = strdup(base_secret);
+	merge_config(base, cli);
+	ck_assert_str_eq(base_secret, base->secret);
 
-	merge_config(&base, &cli);
-
-	ck_assert_ptr_eq(base_secret, base.secret);
+	free_args(base);
+	free_args(cli);
 }
 // *INDENT-OFF*
 END_TEST
@@ -187,19 +185,18 @@ END_TEST
 
 START_TEST(test_secret_is_merged)
 {
+	struct arguments *base = create_args();
+	struct arguments *cli = create_args();
 	static char *base_secret = "test";
 	static char *cli_secret = "new";
 
-	struct arguments base = {
-		.secret = base_secret,
-	};
-	struct arguments cli = {
-		.secret = cli_secret,
-	};
+	base->secret = strdup(base_secret);
+	cli->secret = strdup(cli_secret);
+	merge_config(base, cli);
+	ck_assert_str_eq(cli_secret, base->secret);
 
-	merge_config(&base, &cli);
-
-	ck_assert_ptr_eq(cli_secret, base.secret);
+	free_args(base);
+	free_args(cli);
 }
 // *INDENT-OFF*
 END_TEST
@@ -207,16 +204,16 @@ END_TEST
 
 START_TEST(test_username_is_not_merged_when_empty)
 {
+	struct arguments *base = create_args();
+	struct arguments *cli = create_args();
 	static char *base_username = "test";
 
-	struct arguments base = {
-		.username = base_username,
-	};
-	struct arguments cli = { 0 };
+	base->username = strdup(base_username);
+	merge_config(base, cli);
+	ck_assert_str_eq(base_username, base->username);
 
-	merge_config(&base, &cli);
-
-	ck_assert_ptr_eq(base_username, base.username);
+	free_args(base);
+	free_args(cli);
 }
 // *INDENT-OFF*
 END_TEST
@@ -224,19 +221,18 @@ END_TEST
 
 START_TEST(test_username_is_merged)
 {
+	struct arguments *base = create_args();
+	struct arguments *cli = create_args();
 	static char *base_username = "test";
 	static char *cli_username = "new";
 
-	struct arguments base = {
-		.username = base_username,
-	};
-	struct arguments cli = {
-		.username = cli_username,
-	};
+	base->username = strdup(base_username);
+	cli->username = strdup(cli_username);
+	merge_config(base, cli);
+	ck_assert_str_eq(cli_username, base->username);
 
-	merge_config(&base, &cli);
-
-	ck_assert_ptr_eq(cli_username, base.username);
+	free_args(base);
+	free_args(cli);
 }
 // *INDENT-OFF*
 END_TEST
@@ -244,16 +240,16 @@ END_TEST
 
 START_TEST(test_validation_is_not_merged_when_empty)
 {
+	struct arguments *base = create_args();
+	struct arguments *cli = create_args();
 	static int base_validation = VALIDATE;
 
-	struct arguments base = {
-		.validate = base_validation,
-	};
-	struct arguments cli = { 0 };
+	base->validate = base_validation;
+	merge_config(base, cli);
+	ck_assert_int_eq(base_validation, base->validate);
 
-	merge_config(&base, &cli);
-
-	ck_assert_int_eq(base_validation, base.validate);
+	free_args(base);
+	free_args(cli);
 }
 // *INDENT-OFF*
 END_TEST
@@ -261,19 +257,18 @@ END_TEST
 
 START_TEST(test_validation_is_merged)
 {
+	struct arguments *base = create_args();
+	struct arguments *cli = create_args();
 	static int base_validation = VALIDATE;
 	static int cli_validation = SKIP_VALIDATION;
 
-	struct arguments base = {
-		.validate = base_validation,
-	};
-	struct arguments cli = {
-		.validate = cli_validation,
-	};
+	base->validate = base_validation;
+	cli->validate = cli_validation;
+	merge_config(base, cli);
+	ck_assert_int_eq(cli_validation, base->validate);
 
-	merge_config(&base, &cli);
-
-	ck_assert_int_eq(cli_validation, base.validate);
+	free_args(base);
+	free_args(cli);
 }
 // *INDENT-OFF*
 END_TEST

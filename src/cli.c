@@ -108,22 +108,22 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state)
 
 	switch (key) {
 	case OPT_CONFIG:
-		arguments->config_file = arg;
+		arguments->config_file = strdup(arg);
 		break;
 	case OPT_HOST:
-		arguments->host = arg;
+		arguments->host = strdup(arg);
 		break;
 	case OPT_KEY:
-		arguments->key_handle = arg;
+		arguments->key_handle = strdup(arg);
 		break;
 	case OPT_PORT:
 		arguments->port = atol(arg);
 		break;
 	case OPT_SECRET:
-		arguments->secret = arg;
+		arguments->secret = strdup(arg);
 		break;
 	case OPT_USER:
-		arguments->username = arg;
+		arguments->username = strdup(arg);
 		break;
 	case OPT_SKIP_VALIDATION:
 		arguments->validate = SKIP_VALIDATION;
@@ -146,12 +146,25 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state)
 	return 0;
 }
 
+struct arguments *create_args(void)
+{
+	return calloc(1, sizeof(struct arguments));
+}
+
 enum unlocked_err handle_args(int argc, char **argv, struct arguments *args)
 {
-	struct arguments cli_args = { 0 };
-	struct arguments config_args = { 0 };
+	struct arguments *cli_args = create_args();
+	struct arguments *config_args = create_args();
 	enum unlocked_err err = UL_OK;
-        // *INDENT-OFF*
+
+	if (NULL == cli_args) {
+		return UL_MALLOC;
+	}
+	if (NULL == config_args) {
+		free_args(cli_args);
+
+		return UL_MALLOC;
+	}
 	struct argp argp_client = {
 		.options = options,
 		.parser = parse_opt,
@@ -161,18 +174,20 @@ enum unlocked_err handle_args(int argc, char **argv, struct arguments *args)
 		.help_filter = NULL,
 		.argp_domain = NULL,
 	};
-        // *INDENT-ON*
-	argp_parse(&argp_client, argc, argv, 0, 0, &cli_args);
 
-	if (cli_args.config_file) {
-		err = parse_config_file(cli_args.config_file, &config_args);
+	argp_parse(&argp_client, argc, argv, 0, 0, cli_args);
+
+	if (cli_args->config_file) {
+		err = parse_config_file(cli_args->config_file, config_args);
 		if (UL_OK != err) {
 			return err;
 		}
 	}
 
-	merge_config(args, &config_args);
-	merge_config(args, &cli_args);
+	merge_config(args, config_args);
+	free_args(config_args);
+	merge_config(args, cli_args);
+	free_args(cli_args);
 
 	return UL_OK;
 }
@@ -180,22 +195,37 @@ enum unlocked_err handle_args(int argc, char **argv, struct arguments *args)
 void merge_config(struct arguments *base, struct arguments *new)
 {
 	if (new->config_file) {
-		base->config_file = new->config_file;
+		if (base->config_file) {
+			free(base->config_file);
+		}
+		base->config_file = strdup(new->config_file);
 	}
 	if (new->key_handle) {
-		base->key_handle = new->key_handle;
+		if (base->key_handle) {
+			free(base->key_handle);
+		}
+		base->key_handle = strdup(new->key_handle);
 	}
 	if (new->host) {
-		base->host = new->host;
+		if (base->host) {
+			free(base->host);
+		}
+		base->host = strdup(new->host);
 	}
 	if (new->port) {
 		base->port = new->port;
 	}
 	if (new->secret) {
-		base->secret = new->secret;
+		if (base->secret) {
+			free(base->secret);
+		}
+		base->secret = strdup(new->secret);
 	}
 	if (new->username) {
-		base->username = new->username;
+		if (base->username) {
+			free(base->username);
+		}
+		base->username = strdup(new->username);
 	}
 	if (new->validate) {
 		base->validate = new->validate;
@@ -211,6 +241,7 @@ enum unlocked_err parse_config_file(const char *const path,
 	const char *secret = NULL;
 	const char *username = NULL;
 	int validate = 0;
+	enum unlocked_err err = UL_OK;
 
 	ini = iniparser_load(path);
 	if (NULL == ini) {
@@ -268,9 +299,14 @@ enum unlocked_err parse_config_file(const char *const path,
 		args->validate = 0;
 	}
 
+	err = parse_config(ini);
+	if (UL_OK != err) {
+		return err;
+	}
+
 	iniparser_freedict(ini);
 
-	return UL_OK;
+	return err;
 }
 
 enum unlocked_err register_child_parser(const struct unlocked_module *module)
@@ -304,6 +340,31 @@ enum unlocked_err register_child_parser(const struct unlocked_module *module)
 	sub_parser_inputs[sub_parser_count] = module->state;
 
 	sub_parser_count++;
+}
+
+void free_args(struct arguments *args)
+{
+	if (NULL == args) {
+		return;
+	}
+
+	if (args->config_file) {
+		free(args->config_file);
+	}
+	if (args->key_handle) {
+		free(args->key_handle);
+	}
+	if (args->host) {
+		free(args->host);
+	}
+	if (args->secret) {
+		free(args->secret);
+	}
+	if (args->username) {
+		free(args->username);
+	}
+
+	free(args);
 }
 
 void free_child_parsers(void)

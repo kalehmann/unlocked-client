@@ -36,6 +36,8 @@ enum unlocked_err cleanup_modules(void)
 		}
 	}
 	free(modules);
+	modules = NULL;
+	module_count = 0;
 
 	return err;
 }
@@ -63,6 +65,22 @@ enum unlocked_err handle_success(const char *const key)
 	for (unsigned int i = 0; i < module_count; i++) {
 		if (NULL != modules[i]->success) {
 			err = modules[i]->success(modules[i], key);
+			if (UL_OK != err) {
+				return err;
+			}
+		}
+	}
+
+	return err;
+}
+
+enum unlocked_err parse_config(const dictionary * ini)
+{
+	enum unlocked_err err = UL_OK;
+
+	for (unsigned int i = 0; i < module_count; i++) {
+		if (NULL != modules[i]->parse_config) {
+			err = modules[i]->parse_config(modules[i], ini);
 			if (UL_OK != err) {
 				return err;
 			}
