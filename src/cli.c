@@ -33,7 +33,6 @@
 #define OPT_SKIP_VALIDATION 256
 #define OPT_VERBOSE 257
 
-
 static char doc[] = "unlocked-client -- a tool to fetch keys from a server";
 static size_t sub_parser_count = 0;
 static struct argp_child *sub_parsers = NULL;

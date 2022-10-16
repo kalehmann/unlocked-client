@@ -94,7 +94,8 @@ static enum unlocked_err init(struct unlocked_module *module)
 		return UL_SD_SOCKET_MANY_FD;
 	}
 
-	logger(LOG_DEBUG, "Socket \"%s\" passed by systemd.\n", socket_names[0]);
+	logger(LOG_DEBUG, "Socket \"%s\" passed by systemd.\n",
+	       socket_names[0]);
 	state->socket_fd = SD_LISTEN_FDS_START + 0;
 
 	return UL_OK;

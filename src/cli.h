@@ -23,7 +23,7 @@
 #include "mod/module.h"
 #include "error.h"
 
-enum tristate {no = -1, unset = 0, yes = 1};
+enum tristate { no = -1, unset = 0, yes = 1 };
 
 struct arguments {
 	char *config_file;
