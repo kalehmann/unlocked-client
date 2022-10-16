@@ -23,16 +23,47 @@
 #include "mod/module.h"
 #include "error.h"
 
+/**
+ * Enumeration used to store boolean values in the arguments structure.
+ */
 enum tristate { no = -1, unset = 0, yes = 1 };
 
+/**
+ * Contains arguments for the program.
+ */
 struct arguments {
+	/**
+	 * If not NULL, the config file at this path will be parsed to further
+	 * populate this structure.
+	 */
 	char *config_file;
+	/**
+	 * The handle of the key that should be requested from the server.
+	 */
 	char *key_handle;
+	/**
+	 * The host name or ip address of the server.
+	 */
 	char *host;
+	/**
+	 * The port of the server.
+	 */
 	long port;
+	/**
+	 * The secret used to authenticate the client against the server.
+	 */
 	char *secret;
+	/**
+	 * The username used to identify the client.
+	 */
 	char *username;
+	/**
+	 * Whether to validate the certificate of the server.
+	 */
 	enum tristate validate;
+	/**
+	 * Whether to output additional information for debugging purposes.
+	 */
 	enum tristate verbose;
 };
 
