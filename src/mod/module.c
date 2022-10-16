@@ -47,7 +47,7 @@ enum unlocked_err handle_failure(enum unlocked_err provided_err)
 	enum unlocked_err err = UL_OK;
 
 	for (unsigned int i = 0; i < module_count; i++) {
-		if (NULL != modules[i]->failure) {
+		if (module->enabled && NULL != modules[i]->failure) {
 			err = modules[i]->failure(modules[i], provided_err);
 			if (UL_OK != err) {
 				return err;
@@ -63,7 +63,7 @@ enum unlocked_err handle_success(const char *const key)
 	enum unlocked_err err = UL_OK;
 
 	for (unsigned int i = 0; i < module_count; i++) {
-		if (NULL != modules[i]->success) {
+		if (module->enabled && NULL != modules[i]->success) {
 			err = modules[i]->success(modules[i], key);
 			if (UL_OK != err) {
 				return err;
