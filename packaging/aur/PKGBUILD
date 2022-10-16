@@ -1,0 +1,48 @@
+# Maintainer: Karsten Lehmann <mail@kalehmann.de>
+pkgname="unlocked-client"
+pkgver="0.1.0"
+pkgrel=1
+epoch=
+pkgdesc=""
+arch=('x86_64')
+url="https://github.com/kalehmann/unlocked-client"
+license=('GPL')
+groups=()
+depends=('curl' 'openssl')
+makedepends=('cmake' 'git')
+checkdepends=()
+optdepends=()
+provides=()
+conflicts=()
+replaces=();
+backup=()
+options=()
+install=
+changelog=
+source=("${pkgname}-${pkgver}::git+https://github.com/kalehmann/unlocked-client.git")
+noextract=()
+md5sums=(SKIP)
+validpgpkeys=()
+
+prepare() {
+    cd "${srcdir}/${pkgname}-${pkgver}"
+    git submodule update --init --recursive --remote
+}
+
+build() {
+    cmake -B build -S "${pkgname}-${pkgver}" \
+        -DCMAKE_BUILD_TYPE='None' \
+        -DCMAKE_INSTALL_PREFIX='/usr' \
+	-DCMAKE_INSTALL_SYSCONFDIR='/etc' \
+        -Wno-dev
+    cmake --build build
+}
+
+check() {
+    ctest --test-dir build --output-on-failure
+}
+
+package() {
+    echo "Installing to $pkgdir"
+    DESTDIR="$pkgdir" cmake --install build
+}
