@@ -24,16 +24,86 @@
 
 #include "../error.h"
 
+/**
+ * Structure for modules.
+ *
+ * While not recommended, any member can be safely set to NULL.
+ */
 struct unlocked_module {
+	/**
+	 * Structure with information about the cli argument parser.
+	 */
 	struct argp *argp;
+	/**
+	 * If necessary, the internal state of the module.
+	 */
 	void *state;
-	enum unlocked_err (*parse_config) (struct unlocked_module *,
-					   const dictionary *);
+	/**
+	 * The name of the module.
+	 */
+	const char *name;
+	/**
+	 * The module can set this value after parsing the config to set if
+	 * it has been enabled or not.
+	 *
+	 * If not enabled, the failure or success callbacks will not be invoked
+	 * for this module. However init and cleanup will still be invoked in
+	 * case the module needs to perform some sanity checks.
+	 */
+	unsigned int enabled;
+	/**
+	 * The dictionary from the parsed config file is passed to this
+	 * function.
+	 *
+	 * @param module is the instance of the module.
+	 * @param dict is the dictionary of the parsed config file.
+	 *
+	 * @return any error that occured.
+	 */
+	enum unlocked_err (*parse_config) (struct unlocked_module * module,
+					   const dictionary * dict);
+	/**
+	 * Used to initialize additional resources for the module.
+	 *
+	 * This method is called whether the module has been enabled or not.
+	 * Therefore it is necessary to check `module->enabled` in the function.
+	 *
+	 * @param module is the instance of the module.
+	 *
+	 * @return any error that occured.
+	 */
 	enum unlocked_err (*init) (struct unlocked_module *);
-	enum unlocked_err (*success) (struct unlocked_module *,
-				      const char *const);
-	enum unlocked_err (*failure) (struct unlocked_module *,
-				      enum unlocked_err);
+	/**
+	 * Called after a key has been received from the server.
+	 *
+	 * @param module is the instance of the module.
+	 * @param key is the key received from the server.
+	 *
+	 * @return any error that occured.
+	 */
+	enum unlocked_err (*success) (struct unlocked_module * module,
+				      const char *const key);
+	/**
+	 * Called on failure.
+	 *
+	 * @param module is the instance of the module.
+	 * @param err is the code of the error that occured.
+	 *
+	 * @return any error that occured while handling the failure..
+	 */
+	enum unlocked_err (*failure) (struct unlocked_module * module,
+				      enum unlocked_err err);
+	/**
+	 * Called after retrieving a key has succeded or failed to cleanup any
+	 * resource allocated in init.
+	 *
+	 * This method is called whether the module has been enabled or not.
+	 * Therefore it is necessary to check `module->enabled` in the function.
+	 *
+	 * @param module is the instance of the module.
+	 *
+	 * @return any error that occured.
+	 */
 	enum unlocked_err (*cleanup) (struct unlocked_module *);
 };
 

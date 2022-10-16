@@ -27,9 +27,7 @@
 
 #define OPT_STDOUT 300
 
-struct stdout_state {
-	int use_stdout;
-};
+static const char *const module_name = "mod_stdout";
 
 // *INDENT-OFF*
 static struct argp_option options[] = {
@@ -46,11 +44,11 @@ static struct argp_option options[] = {
 
 static error_t stdout_parser(int key, char *arg, struct argp_state *state)
 {
-	struct stdout_state *input = state->input;
+	struct unlocked_module *module = state->input;
 
 	switch (key) {
 	case OPT_STDOUT:
-		input->use_stdout = 1;
+		module->enabled = 1;
 		break;
 	default:
 		return ARGP_ERR_UNKNOWN;
@@ -79,8 +77,7 @@ static enum unlocked_err success(struct unlocked_module *module,
 				 const char *const key)
 {
 	size_t key_len = strlen(key);
-	struct stdout_state *state = module->state;
-	if (!state->use_stdout) {
+	if (!module->enabled) {
 		return UL_OK;
 	}
 	if (key_len != fwrite(key, sizeof(char), key_len, stdout)) {
@@ -96,15 +93,14 @@ static enum unlocked_err success(struct unlocked_module *module,
 static enum unlocked_err parse_stdout_config(struct unlocked_module *module,
 					     const dictionary * ini)
 {
-	struct stdout_state *state = module->state;
 	int use = iniparser_getboolean(ini, "stdout:use_stdout", -1);
 
 	switch (use) {
 	case 1:
-		state->use_stdout = 1;
+		module->enabled = 1;
 		break;
 	case 0:
-		state->use_stdout = 0;
+		module->enabled = 0;
 		break;
 	}
 
@@ -128,17 +124,6 @@ static struct argp *init_argp(void)
 	return argp;
 }
 
-static struct stdout_state *init_state(void)
-{
-	struct stdout_state *state = malloc(sizeof(struct stdout_state));
-	if (NULL == state) {
-		return NULL;
-	}
-	state->use_stdout = 0;
-
-	return state;
-}
-
 struct unlocked_module *get_mod_stdout(void)
 {
 	struct unlocked_module *module = malloc(sizeof(struct unlocked_module));
@@ -149,12 +134,9 @@ struct unlocked_module *get_mod_stdout(void)
 	if (NULL == module->argp) {
 		return NULL;
 	}
-	module->state = init_state();
-	if (NULL == module->state) {
-		free(module->argp);
-
-		return NULL;
-	}
+	module->state = NULL;
+	module->name = module_name;
+	module->enabled = 0;
 	module->init = NULL;
 	module->parse_config = &parse_stdout_config;
 	module->success = &success;

@@ -28,8 +28,9 @@
 
 struct sd_socket_state {
 	int socket_fd;
-	int use_sd_socket;
 };
+
+static const char *const module_name = "mod_sd_socket";
 
 // *INDENT-OFF*
 static struct argp_option options[] = {
@@ -46,11 +47,11 @@ static struct argp_option options[] = {
 
 static error_t sd_socket_parser(int key, char *arg, struct argp_state *state)
 {
-	struct sd_socket_state *input = state->input;
+	struct unlocked_module *module = state->input;
 
 	switch (key) {
 	case OPT_SD_SOCKET:
-		input->use_sd_socket = 1;
+		module->enabled = 1;
 		break;
 	default:
 		return ARGP_ERR_UNKNOWN;
@@ -80,7 +81,7 @@ static enum unlocked_err init(struct unlocked_module *module)
 	char **socket_names = 0;
 	int fd_count = sd_listen_fds_with_names(0, &socket_names);
 	struct sd_socket_state *state = module->state;
-	if (!state->use_sd_socket) {
+	if (!module->enabled) {
 		if (fd_count > 0) {
 			return UL_SD_SOCKET_DISABLED;
 		}
@@ -107,7 +108,7 @@ static enum unlocked_err success(struct unlocked_module *module,
 	int client_fd = 0, ret = 0;
 	size_t key_len = strlen(key);
 	struct sd_socket_state *state = module->state;
-	if (!state->use_sd_socket) {
+	if (!module->enabled) {
 		return UL_OK;
 	}
 	client_fd = accept(state->socket_fd, NULL, NULL);
@@ -125,15 +126,14 @@ static enum unlocked_err success(struct unlocked_module *module,
 static enum unlocked_err parse_sd_socket_config(struct unlocked_module *module,
 						const dictionary * ini)
 {
-	struct sd_socket_state *state = module->state;
 	int use = iniparser_getboolean(ini, "sd_socket:use_socket", -1);
 
 	switch (use) {
 	case 1:
-		state->use_sd_socket = 1;
+		module->enabled = 1;
 		break;
 	case 0:
-		state->use_sd_socket = 0;
+		module->enabled = 0;
 		break;
 	}
 
@@ -164,7 +164,6 @@ static struct sd_socket_state *init_state(void)
 		return NULL;
 	}
 	state->socket_fd = 0;
-	state->use_sd_socket = 0;
 
 	return state;
 }
@@ -185,6 +184,8 @@ struct unlocked_module *get_mod_sd_socket(void)
 
 		return NULL;
 	}
+	module->name = module_name;
+	module->enabled = 0;
 	module->init = &init;
 	module->parse_config = &parse_sd_socket_config;
 	module->success = &success;

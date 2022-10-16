@@ -326,7 +326,7 @@ enum unlocked_err parse_config_file(const char *const path,
 	return err;
 }
 
-enum unlocked_err register_child_parser(const struct unlocked_module *module)
+enum unlocked_err register_child_parser(struct unlocked_module *module)
 {
 	static const size_t child_size = sizeof(struct argp_child);
 
@@ -354,7 +354,7 @@ enum unlocked_err register_child_parser(const struct unlocked_module *module)
 	sub_parsers[sub_parser_count + 1].header = NULL;
 	sub_parsers[sub_parser_count + 1].group = 0;
 
-	sub_parser_inputs[sub_parser_count] = module->state;
+	sub_parser_inputs[sub_parser_count] = module;
 
 	sub_parser_count++;
 }

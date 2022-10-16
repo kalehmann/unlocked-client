@@ -93,7 +93,7 @@ enum unlocked_err parse_config_file(const char *const path,
  *
  * @return any error that occured
  */
-enum unlocked_err register_child_parser(const struct unlocked_module *module);
+enum unlocked_err register_child_parser(struct unlocked_module *module);
 
 /**
  * Free all resources related to the arguments structure.
