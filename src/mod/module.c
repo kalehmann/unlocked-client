@@ -18,6 +18,7 @@
 #include <stdlib.h>
 #include "module.h"
 #include "../cli.h"
+#include "../log.h"
 
 static struct unlocked_module **modules = NULL;
 
@@ -47,7 +48,15 @@ enum unlocked_err handle_failure(enum unlocked_err provided_err)
 	enum unlocked_err err = UL_OK;
 
 	for (unsigned int i = 0; i < module_count; i++) {
-		if (module->enabled && NULL != modules[i]->failure) {
+		if (modules[i]->enabled && NULL != modules[i]->failure) {
+			if (modules[i]->name) {
+				logger(LOG_DEBUG, "Invoking failure callback "
+				       "on module \"%s\"\n", modules[i]->name);
+			} else {
+				logger(LOG_DEBUG,
+				       "Invoking failure callback on "
+				       "unnamed module\n");
+			}
 			err = modules[i]->failure(modules[i], provided_err);
 			if (UL_OK != err) {
 				return err;
@@ -63,7 +72,16 @@ enum unlocked_err handle_success(const char *const key)
 	enum unlocked_err err = UL_OK;
 
 	for (unsigned int i = 0; i < module_count; i++) {
-		if (module->enabled && NULL != modules[i]->success) {
+		if (modules[i]->enabled && NULL != modules[i]->success) {
+			if (modules[i]->name) {
+				logger(LOG_DEBUG,
+				       "Invoking success callback "
+				       "on module \"%s\"\n", modules[i]->name);
+			} else {
+				logger(LOG_DEBUG,
+				       "Invoking success callback on "
+				       "unnamed module\n");
+			}
 			err = modules[i]->success(modules[i], key);
 			if (UL_OK != err) {
 				return err;

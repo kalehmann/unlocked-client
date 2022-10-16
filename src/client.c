@@ -42,6 +42,9 @@ enum unlocked_err request_key(struct arguments *arguments)
 	char *request_state = NULL;
 	enum unlocked_err err = UL_OK;
 
+	logger(LOG_DEBUG, "Requesting the key \"%s\" from the host \"%s\"\n",
+	       arguments->key_handle, arguments->host);
+
 	request.body = get_key_request_body(arguments->key_handle);
 	if (NULL == request.body) {
 		return UL_MALLOC;
@@ -117,9 +120,8 @@ enum unlocked_err request_key(struct arguments *arguments)
 	}
 	if (0 == strcmp(request_state, "DENIED")) {
 		free(request_state);
-		logger(LOG_ERROR, "Request %d denied by server\n", request_id);
 
-		return UL_ERR;
+		return UL_DENIED;
 	}
 	if (strcmp(request_state, "ACCEPTED")) {
 		logger(LOG_ERROR, "Unexpected state for request %d: \"%s\"\n",

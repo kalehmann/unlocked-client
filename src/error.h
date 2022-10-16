@@ -23,6 +23,7 @@
 enum unlocked_err {
 	UL_OK = 0,
 	UL_CURL,
+	UL_DENIED,
 	UL_ERR,
 	UL_ERRNO,
 	UL_MALLOC,

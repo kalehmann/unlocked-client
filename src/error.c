@@ -24,6 +24,7 @@
 
 static const char *ERR_OK = "No error\n";
 static const char *ERR_CURL = "There was an error calling libcurl\n";
+static const char *ERR_DENIED = "The request was denied by the server\n";
 static const char *ERR_ERR = "Logic error\n";
 static const char *ERR_MALLOC = "Failed to allocate memory\n";
 static const char *ERR_SD_SOCKET_DISABLED = "SD_SOCKET is not active, but at "
@@ -41,6 +42,8 @@ const char *ul_error(enum unlocked_err err)
 		return ERR_OK;
 	case UL_CURL:
 		return ERR_CURL;
+	case UL_DENIED:
+		return ERR_DENIED;
 	case UL_ERR:
 		return ERR_ERR;
 	case UL_ERRNO:
