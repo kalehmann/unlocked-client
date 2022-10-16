@@ -242,7 +242,7 @@ START_TEST(test_validation_is_not_merged_when_empty)
 {
 	struct arguments *base = create_args();
 	struct arguments *cli = create_args();
-	static int base_validation = VALIDATE;
+	static enum tristate base_validation = yes;
 
 	base->validate = base_validation;
 	merge_config(base, cli);
@@ -259,13 +259,49 @@ START_TEST(test_validation_is_merged)
 {
 	struct arguments *base = create_args();
 	struct arguments *cli = create_args();
-	static int base_validation = VALIDATE;
-	static int cli_validation = SKIP_VALIDATION;
+	static enum tristate base_validation = yes;
+	static enum tristate cli_validation = no;
 
 	base->validate = base_validation;
 	cli->validate = cli_validation;
 	merge_config(base, cli);
 	ck_assert_int_eq(cli_validation, base->validate);
+
+	free_args(base);
+	free_args(cli);
+}
+// *INDENT-OFF*
+END_TEST
+// *INDENT-ON*
+
+START_TEST(test_verbose_is_not_merged_when_empty)
+{
+	struct arguments *base = create_args();
+	struct arguments *cli = create_args();
+	static enum tristate base_verbose = yes;
+
+	base->verbose = base_verbose;
+	merge_config(base, cli);
+	ck_assert_int_eq(base_verbose, base->verbose);
+
+	free_args(base);
+	free_args(cli);
+}
+// *INDENT-OFF*
+END_TEST
+// *INDENT-ON*
+
+START_TEST(test_verbose_is_merged)
+{
+	struct arguments *base = create_args();
+	struct arguments *cli = create_args();
+	static enum tristate base_verbose = yes;
+	static enum tristate cli_verbose = no;
+
+	base->verbose = base_verbose;
+	cli->verbose = cli_verbose;
+	merge_config(base, cli);
+	ck_assert_int_eq(cli_verbose, base->verbose);
 
 	free_args(base);
 	free_args(cli);
@@ -293,6 +329,8 @@ static TCase *make_cli_merge_config_case(void)
 	tcase_add_test(tc, test_username_is_merged);
 	tcase_add_test(tc, test_validation_is_not_merged_when_empty);
 	tcase_add_test(tc, test_validation_is_merged);
+	tcase_add_test(tc, test_verbose_is_not_merged_when_empty);
+	tcase_add_test(tc, test_verbose_is_merged);
 
 	return tc;
 }

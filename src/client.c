@@ -48,7 +48,7 @@ enum unlocked_err request_key(struct arguments *arguments)
 	}
 	request.port = arguments->port;
 	request.secret = arguments->secret;
-	request.skip_validation = SKIP_VALIDATION == arguments->validate;
+	request.skip_validation = no == arguments->validate;
 	request.url = get_key_request_url(arguments->host);
 	if (NULL == request.url) {
 		free(request.body);

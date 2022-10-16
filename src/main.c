@@ -69,7 +69,7 @@ int main(int argc, char **argv)
 		return EXIT_FAILURE;
 	}
 	arguments->port = 443;
-	arguments->validate = VALIDATE;
+	arguments->validate = yes;
 
 	register_module(get_mod_sd_socket());
 	register_module(get_mod_stdout());

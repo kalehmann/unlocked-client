@@ -20,11 +20,10 @@
 #ifndef UNLOCKED_CLI_H
 #define UNLOCKED_CLI_H
 
-#define SKIP_VALIDATION 1
-#define VALIDATE -1
-
 #include "mod/module.h"
 #include "error.h"
+
+enum tristate {no = -1, unset = 0, yes = 1};
 
 struct arguments {
 	char *config_file;
@@ -33,7 +32,8 @@ struct arguments {
 	long port;
 	char *secret;
 	char *username;
-	int validate;
+	enum tristate validate;
+	enum tristate verbose;
 };
 
 /**

@@ -31,6 +31,7 @@
 #define OPT_SECRET 's'
 #define OPT_USER 'u'
 #define OPT_SKIP_VALIDATION 256
+#define OPT_VERBOSE 257
 
 static char doc[] = "unlocked-client -- a tool to fetch keys from a server";
 
@@ -89,6 +90,13 @@ static struct argp_option options[] = {
 		.flags = 0,
 		.doc = "Skip certificate validation",
 	},
+	{
+		.name = "verbose",
+		.key = OPT_VERBOSE,
+		.arg = 0,
+		.flags = 0,
+		.doc = "Output debug information",
+	},
 	{ 0 }
 };
 // *INDENT-ON*
@@ -126,7 +134,10 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state)
 		arguments->username = strdup(arg);
 		break;
 	case OPT_SKIP_VALIDATION:
-		arguments->validate = SKIP_VALIDATION;
+		arguments->validate = no;
+		break;
+	case OPT_VERBOSE:
+		arguments->verbose = yes;
 		break;
 	case ARGP_KEY_ARG:
 		argp_usage(state);
@@ -230,6 +241,9 @@ void merge_config(struct arguments *base, struct arguments *new)
 	if (new->validate) {
 		base->validate = new->validate;
 	}
+	if (new->verbose) {
+		base->verbose = new->verbose;
+	}
 }
 
 enum unlocked_err parse_config_file(const char *const path,
@@ -290,13 +304,13 @@ enum unlocked_err parse_config_file(const char *const path,
 	validate = iniparser_getboolean(ini, "unlocked:validate", -1);
 	switch (validate) {
 	case 1:
-		args->validate = VALIDATE;
+		args->validate = yes;
 		break;
 	case 0:
-		args->validate = SKIP_VALIDATION;
+		args->validate = no;
 		break;
 	default:
-		args->validate = 0;
+		args->validate = unset;
 	}
 
 	err = parse_config(ini);
