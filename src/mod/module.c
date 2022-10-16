@@ -74,6 +74,22 @@ enum unlocked_err handle_success(const char *const key)
 	return err;
 }
 
+enum unlocked_err initialize_modules(void)
+{
+	enum unlocked_err err = UL_OK;
+
+	for (unsigned int i = 0; i < module_count; i++) {
+		if (NULL != modules[i]->init) {
+			err = modules[i]->init(modules[i]);
+			if (UL_OK != err) {
+				return err;
+			}
+		}
+	}
+
+	return err;
+}
+
 enum unlocked_err parse_config(const dictionary * ini)
 {
 	enum unlocked_err err = UL_OK;

@@ -22,7 +22,9 @@
 #include "cli.h"
 #include "client.h"
 #include "error.h"
+#include "log.h"
 #include "mod/module.h"
+#include "mod/mod_sd_socket.h"
 #include "mod/mod_stdout.h"
 
 const char *argp_program_version = "unlocked-client dev";
@@ -69,6 +71,7 @@ int main(int argc, char **argv)
 	arguments->port = 443;
 	arguments->validate = VALIDATE;
 
+	register_module(get_mod_sd_socket());
 	register_module(get_mod_stdout());
 	handle_args(argc, argv, arguments);
 	if (EXIT_SUCCESS != validate_args(arguments)) {
@@ -78,13 +81,22 @@ int main(int argc, char **argv)
 
 		return EXIT_FAILURE;
 	}
+	err = initialize_modules();
+	if (UL_OK != err) {
+		free_args(arguments);
+		free_child_parsers();
+		cleanup_modules();
+		logger(LOG_ERROR, ul_error(err));
+
+		return EXIT_FAILURE;
+	}
 
 	err = request_key(arguments);
 	free_args(arguments);
 	free_child_parsers();
 	cleanup_modules();
 	if (UL_OK != err) {
-		ul_error(err);
+		logger(LOG_ERROR, ul_error(err));
 
 		return EXIT_FAILURE;
 	}

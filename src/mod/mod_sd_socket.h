@@ -1,5 +1,4 @@
 // Copyright 2022 by Karsten Lehmann <mail@kalehmann.de>
-
 /*
  * This file is part of unlocked-client.
  *
@@ -17,27 +16,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef UNLOCKED_ERROR_H
-#define UNLOCKED_ERROR_H
+#ifndef UNLOCKED_MOD_SD_SOCKET_H
+#define UNLOCKED_MOD_SD_SOCKET_H
 
-enum unlocked_err {
-	UL_OK = 0,
-	UL_CURL,
-	UL_ERR,
-	UL_ERRNO,
-	UL_MALLOC,
-	UL_SD_SOCKET_DISABLED,
-	UL_SD_SOCKET_NO_FD,
-	UL_SD_SOCKET_MANY_FD,
-};
+#include "module.h"
 
 /**
- * Get a human readable string for an error.
+ * Returns a module for systemd socket activation.
  *
- * @param err the error code to get a human readable string for
+ * Upon initialization, the module takes a single file descriptor for
+ * a socket provided by systemd and provides the key through the socket on
+ * success.
  *
- * @return the human readable string describing the error.
+ * @return a pointer to the module
  */
-const char *ul_error(enum unlocked_err err);
+struct unlocked_module *get_mod_sd_socket(void);
 
 #endif

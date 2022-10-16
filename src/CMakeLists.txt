@@ -26,5 +26,9 @@ add_subdirectory(mod)
 
 find_package( CURL REQUIRED )
 find_package( OpenSSL REQUIRED )
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(SYSTEMD REQUIRED IMPORTED_TARGET libsystemd)
+
 target_link_libraries( libunlocked PRIVATE CURL::libcurl iniparser OpenSSL::SSL )
+target_link_libraries( libunlocked INTERFACE PkgConfig::SYSTEMD)
 target_link_libraries( unlocked-client PRIVATE libunlocked )

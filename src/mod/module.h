@@ -63,6 +63,13 @@ enum unlocked_err handle_failure(enum unlocked_err err);
 enum unlocked_err handle_success(const char *const key);
 
 /**
+ * Give the modules a chance to initialize additional resources.
+ *
+ * @return any error from the modules
+ */
+enum unlocked_err initialize_modules(void);
+
+/**
  * Let all the registered modules parse the config file.
  *
  * @param ini is the dictionary of the loaded config file.
