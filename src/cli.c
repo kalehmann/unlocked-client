@@ -33,11 +33,12 @@
 #define OPT_SKIP_VALIDATION 256
 #define OPT_VERBOSE 257
 
-static char doc[] = "unlocked-client -- a tool to fetch keys from a server";
 
+static char doc[] = "unlocked-client -- a tool to fetch keys from a server";
 static size_t sub_parser_count = 0;
 static struct argp_child *sub_parsers = NULL;
 static void **sub_parser_inputs = NULL;
+static unsigned int is_debug = 0;
 
 // *INDENT-OFF*
 static struct argp_option options[] = {
@@ -199,6 +200,9 @@ enum unlocked_err handle_args(int argc, char **argv, struct arguments *args)
 	free_args(config_args);
 	merge_config(args, cli_args);
 	free_args(cli_args);
+
+	// Set global debug mode.
+	is_debug = args->verbose == yes;
 
 	return UL_OK;
 }
@@ -386,4 +390,9 @@ void free_child_parsers(void)
 	free(sub_parsers);
 	free(sub_parser_inputs);
 	sub_parser_count = 0;
+}
+
+unsigned int ul_debug(void)
+{
+	return is_debug;
 }

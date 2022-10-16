@@ -105,4 +105,14 @@ void free_args(struct arguments *args);
  */
 void free_child_parsers(void);
 
+/**
+ * This function is used to decide whether additional data should be outputted
+ * for debugging purposes.
+ *
+ * The value this function returns is decided in the `handle_args` function.
+ *
+ * @returns if application is in debug mode.
+ */
+unsigned int ul_debug(void);
+
 #endif

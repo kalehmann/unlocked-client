@@ -22,6 +22,9 @@
 
 #include <string.h>
 
+#include "cli.h"
+
+#define LOG_DEBUG "debug"
 #define LOG_ERROR "error"
 #define LOG_INFO "info"
 #define LOG_WARNING "warning"
@@ -32,6 +35,12 @@
                 fprintf(stderr, "[%s] ", level);                        \
                 fprintf(stderr, ##__VA_ARGS__);                         \
                 fflush(stderr);                                         \
+        } else if (0 == strcmp(level, LOG_DEBUG)) {                     \
+	        if (ul_debug()) {                                       \
+		        fprintf(stdout, "[%s] ", level);                \
+			fprintf(stdout, ##__VA_ARGS__);                 \
+			fflush(stdout);                                 \
+	        }                                                       \
         } else {                                                        \
                 fprintf(stdout, "[%s] ", level);                        \
                 fprintf(stdout, ##__VA_ARGS__);                         \
