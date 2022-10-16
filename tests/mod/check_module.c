@@ -40,6 +40,8 @@ static enum unlocked_err test_mod_failure(struct unlocked_module *module,
 }
 
 static struct unlocked_module test_module = {
+	.name = "mod_test",
+	.enabled = 1,
 	.init = NULL,
 	.success = &test_mod_success,
 	.failure = &test_mod_failure,
