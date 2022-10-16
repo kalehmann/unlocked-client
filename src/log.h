@@ -41,6 +41,6 @@
  * @param ... are additional arguments for the format string. See `man 3 printf`
  *            for further details.
  */
-void logger(const char * const level, const char * const fmt, ...);
+void logger(const char *const level, const char *const fmt, ...);
 
 #endif

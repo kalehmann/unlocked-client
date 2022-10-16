@@ -19,21 +19,21 @@
 
 #include "log.h"
 
-void logger(const char * const level, const char * const fmt, ...)
+void logger(const char *const level, const char *const fmt, ...)
 {
 	FILE *stream = NULL;
 	va_list args;
 	va_start(args, fmt);
 	if (0 == strcmp(level, LOG_ERROR)
-            || 0 == strcmp(level, LOG_WARNING)) {
+	    || 0 == strcmp(level, LOG_WARNING)) {
 		stream = stderr;
-        } else if (0 == strcmp(level, LOG_DEBUG)) {
+	} else if (0 == strcmp(level, LOG_DEBUG)) {
 		if (ul_debug()) {
 			stream = stdout;
 		}
-        } else {
-                stream = stdout;
-        }
+	} else {
+		stream = stdout;
+	}
 
 	if (stream) {
 		fprintf(stream, "[%s] ", level);
