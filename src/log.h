@@ -20,7 +20,9 @@
 #ifndef UNLOCKED_LOG_H
 #define UNLOCKED_LOG_H
 
+#include <stdarg.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "cli.h"
 
@@ -29,23 +31,16 @@
 #define LOG_INFO "info"
 #define LOG_WARNING "warning"
 
-#define logger(level, ...) do {                                         \
-        if (0 == strcmp(level, LOG_ERROR)                               \
-            || 0 == strcmp(level, LOG_WARNING)) {                       \
-                fprintf(stderr, "[%s] ", level);                        \
-                fprintf(stderr, ##__VA_ARGS__);                         \
-                fflush(stderr);                                         \
-        } else if (0 == strcmp(level, LOG_DEBUG)) {                     \
-	        if (ul_debug()) {                                       \
-		        fprintf(stdout, "[%s] ", level);                \
-			fprintf(stdout, ##__VA_ARGS__);                 \
-			fflush(stdout);                                 \
-	        }                                                       \
-        } else {                                                        \
-                fprintf(stdout, "[%s] ", level);                        \
-                fprintf(stdout, ##__VA_ARGS__);                         \
-                fflush(stdout);                                         \
-        }                                                               \
-} while (0)
+/**
+ * Function for log entries.
+ *
+ * @param level defines the priority of the log entry. This decides whether
+ *              the log entry is written to the standard output or the standard
+ *              error stream (or not written at all).
+ * @param fmt is the format string. See `man 3 printf` for further details.
+ * @param ... are additional arguments for the format string. See `man 3 printf`
+ *            for further details.
+ */
+void logger(const char * const level, const char * const fmt, ...);
 
 #endif
