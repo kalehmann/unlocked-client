@@ -8,6 +8,8 @@ set(LIB_SOURCES
    ${CMAKE_CURRENT_SOURCE_DIR}/../vendor/cJSON/cJSON.c
 )
 
+configure_file( version.h.in version.h )
+
 set(SOURCES
    ${CMAKE_CURRENT_SOURCE_DIR}/main.c
 )
@@ -15,6 +17,7 @@ add_executable( unlocked-client ${SOURCES} )
 set_target_properties( unlocked-client PROPERTIES LINKER_LANGUAGE C )
 target_include_directories( unlocked-client PRIVATE
   ${CMAKE_CURRENT_SOURCE_DIR}/../vendor/iniparser/src
+  ${CMAKE_CURRENT_BINARY_DIR}
 )
 
 add_library( libunlocked STATIC ${LIB_SOURCES} )

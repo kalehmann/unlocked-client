@@ -1,5 +1,7 @@
 cmake_minimum_required( VERSION 3.0 )
-project( unlocked-client C )
+project( unlocked-client
+         LANGUAGES C
+         VERSION 0.1 )
 cmake_policy(SET CMP0076 NEW)
 
 ###

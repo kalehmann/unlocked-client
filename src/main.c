@@ -26,8 +26,9 @@
 #include "mod/module.h"
 #include "mod/mod_sd_socket.h"
 #include "mod/mod_stdout.h"
+#include "version.h"
 
-const char *argp_program_version = "unlocked-client dev";
+const char *argp_program_version = "unlocked-client " UNLOCKED_VERSION;
 const char *argp_program_bug_address = "<mail@kalehmann.de>";
 
 static int validate_args(struct arguments *arguments)
