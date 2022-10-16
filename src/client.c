@@ -97,14 +97,14 @@ enum unlocked_err request_key(struct arguments *arguments)
 		if (request_state) {
 			free(request_state);
 			request_state = NULL;
+			// Add a sane delay until the next request.
+			sleep(1);
 		}
 		response = create_response();
 		https_hmac_GET(&request, response);
 		request_state = get_request_state(response);
 		free_response(response);
 		response = NULL;
-
-		sleep(5);
 	} while (request_state && 0 == strcmp(request_state, "PENDING"));
 	free(request.url);
 	request.url = NULL;
@@ -136,10 +136,11 @@ enum unlocked_err request_key(struct arguments *arguments)
 		return UL_MALLOC;
 	}
 	https_hmac_PATCH(&request, response);
-	err = handle_success(response->body);
 	free(request.url);
-	free_response(response);
 	cleanup_https_client();
+
+	err = handle_success(response->body);
+	free_response(response);
 
 	return err;
 }
