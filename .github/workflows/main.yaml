@@ -19,7 +19,7 @@ jobs:
                           with:
                                   submodules: true
                         - name: "Install libcurl and OpenSSL"
-                          run: "sudo apt-get update && sudo apt-get install -yq libcurl4-openssl-dev libc6-dev libssl-dev"
+                          run: "sudo apt-get update && sudo apt-get install -yq libcurl4-openssl-dev libc6-dev libssl-dev libsystemd-dev"
                         - name: "CMake"
                           run: "cd build && cmake .. && make VERBOSE=1"
                         - name: "Run tests"
