@@ -197,6 +197,9 @@ enum unlocked_err https_hmac_GET(struct Request *request,
 	CURLcode status;
 	struct curl_slist *headers = NULL;
 
+	logger(LOG_DEBUG, "Performing GET request against %s on port %d\n",
+	       request->url, request->port);
+
 	headers = add_date_header(headers);
 	if (NULL == headers) {
 		return UL_MALLOC;
@@ -237,6 +240,8 @@ enum unlocked_err https_hmac_GET(struct Request *request,
 
 		return UL_CURL;
 	}
+	logger(LOG_DEBUG, "Finished GET request with status %ld : %s",
+	       response->status, response->body);
 
 	return UL_OK;
 }
@@ -247,6 +252,9 @@ enum unlocked_err https_hmac_PATCH(struct Request *request,
 	CURL *curl;
 	CURLcode status;
 	struct curl_slist *headers = NULL;
+
+	logger(LOG_DEBUG, "Performing PATCH request against %s on port %d with "
+	       "the body %s\n", request->url, request->port, request->body);
 
 	headers = add_date_header(headers);
 	if (NULL == headers) {
@@ -296,6 +304,8 @@ enum unlocked_err https_hmac_PATCH(struct Request *request,
 
 		return UL_CURL;
 	}
+	logger(LOG_DEBUG, "Finished PATCH request with status %ld : %s",
+	       response->status, response->body);
 
 	return UL_OK;
 }
@@ -306,6 +316,9 @@ enum unlocked_err https_hmac_POST(struct Request *request,
 	CURL *curl;
 	CURLcode status;
 	struct curl_slist *headers = NULL;
+
+	logger(LOG_DEBUG, "Performing POST request against %s on port %d with "
+	       "the body %s\n", request->url, request->port, request->body);
 
 	headers = add_date_header(headers);
 	if (NULL == headers) {
@@ -356,6 +369,8 @@ enum unlocked_err https_hmac_POST(struct Request *request,
 
 		return UL_CURL;
 	}
+	logger(LOG_DEBUG, "Finished POST request with status %ld : %s",
+	       response->status, response->body);
 
 	return UL_OK;
 }
