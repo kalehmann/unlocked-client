@@ -1,2 +1,5 @@
+[Unit]
+DefaultDependencies=no
+
 [Service]
 ExecStart=@CMAKE_INSTALL_PREFIX@/bin/unlocked-client --config @UNLOCKED_CONFIG_DIR@/%i.conf

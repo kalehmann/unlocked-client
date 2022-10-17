@@ -1,5 +1,8 @@
+[Unit]
+DefaultDependencies=no
+
 [Socket]
 ListenStream=/run/unlocked-%i.sock
 
 [Install]
-WantedBy=sockets.target
+RequiredBy=cryptsetup-pre.target
