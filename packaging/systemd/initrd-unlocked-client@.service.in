@@ -1,5 +1,9 @@
+# This file is part of unlocked-client
+
 [Unit]
 DefaultDependencies=no
+Description=Unlocked key provision client in the initrd
+Documentation=https://github.com/kalehmann/unlocked-client
 
 [Service]
 ExecStartPre=/usr/bin/sleep 5

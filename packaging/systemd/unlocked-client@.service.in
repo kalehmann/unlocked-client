@@ -1,2 +1,8 @@
+# This file is part of unlocked-client
+
+[Unit]
+Description=Unlocked key provision client
+Documentation=https://github.com/kalehmann/unlocked-client
+
 [Service]
 ExecStart=@CMAKE_INSTALL_PREFIX@/bin/unlocked-client --config @UNLOCKED_CONFIG_DIR@/%i.conf

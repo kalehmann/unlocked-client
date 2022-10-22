@@ -1,4 +1,8 @@
+# This file is part of unlocked-client
+
 [Unit]
+Description=Unlocked key provision client socket
+Documentation=https://github.com/kalehmann/unlocked-client
 PartOf=unlocked-client@.service
 Requires=unlocked-client@.service
 
