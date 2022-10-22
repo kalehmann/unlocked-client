@@ -1,6 +1,6 @@
 # Maintainer: Karsten Lehmann <mail@kalehmann.de>
 pkgname="unlocked-client"
-pkgver="0.1.0"
+pkgver="0.2.0"
 pkgrel=1
 epoch=
 pkgdesc=""
@@ -19,7 +19,7 @@ backup=()
 options=()
 install=
 changelog=
-source=("${pkgname}-${pkgver}::git+https://github.com/kalehmann/unlocked-client.git")
+source=("${pkgname}-${pkgver}::git+https://github.com/kalehmann/unlocked-client.git#tag=0.2.0")
 noextract=()
 md5sums=(SKIP)
 validpgpkeys=()
