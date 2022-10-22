@@ -1,8 +1,9 @@
 [Unit]
-DefaultDependencies=no
+PartOf=unlocked-client@.service
+Requires=unlocked-client@.service
 
 [Socket]
 ListenStream=/run/unlocked-%i.sock
 
 [Install]
-RequiredBy=cryptsetup-pre.target
+WantedBy=sockets.target

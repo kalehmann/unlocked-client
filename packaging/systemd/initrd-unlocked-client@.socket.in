@@ -1,0 +1,15 @@
+[Unit]
+After=initrd-network.service
+Before=cryptsetup-pre.target
+ConditionPathExists=/etc/initrd-release
+DefaultDependencies=no
+PartOf=initrd-unlocked-client@.service
+Requires=initrd-network.service
+Requires=initrd-unlocked-client@.service
+
+[Socket]
+ListenStream=/run/unlocked-%i.sock
+
+[Install]
+WantedBy=sysinit.target
+

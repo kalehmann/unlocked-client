@@ -1,0 +1,10 @@
+[Unit]
+DefaultDependencies=no
+
+[Service]
+ExecStartPre=/usr/bin/sleep 5
+ExecStart=@CMAKE_INSTALL_PREFIX@/bin/unlocked-client --config @UNLOCKED_CONFIG_DIR@/%i.conf
+
+[X-SystemdTool]
+InitrdBinary=/usr/bin/unlocked-client
+InitrdPath=/etc/unlocked
