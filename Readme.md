@@ -10,3 +10,4 @@ initial RAM disk in combination with cryptsetup to unlock a local disk.
 ### Documentation
 
 * [Installation](doc/installation.md)
+* [Configuration](doc/configuration.md)
